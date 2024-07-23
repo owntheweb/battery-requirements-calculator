@@ -58,6 +58,14 @@ const theme = createTheme({
         @import url('https://fonts.googleapis.com/css2?family=Kode+Mono:wght@400..700&display=swap');
       `,
     },
+    MuiTooltip: {
+      styleOverrides: {
+        tooltip: {
+          backgroundColor: '#CC3791',
+          color: '#FFFFFF',
+        },
+      },
+    },
   },
 });
 

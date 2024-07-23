@@ -8,6 +8,8 @@ interface ScaledDimensions {
 }
 
 const BatteryDemoFeature: React.FC = () => {
+  const topNavHeight = 64;
+
   const [scaledDimensions, setScaledDimensions] = useState<ScaledDimensions>({
     width: 0,
     height: 0,
@@ -16,7 +18,6 @@ const BatteryDemoFeature: React.FC = () => {
 
   const updateDimensions = () => {
     if (containerRef.current) {
-      const topNavHeight = 64;
       const containerWidth = Math.min(containerRef.current.offsetWidth, 1920);
       const viewportHeight = window.innerHeight;
       const targetAspectRatio = 1920 / 1136;
@@ -46,7 +47,7 @@ const BatteryDemoFeature: React.FC = () => {
   }, []);
 
   const handleScrollDown = () => {
-    const scrollDistance = scaledDimensions.height;
+    const scrollDistance = scaledDimensions.height + topNavHeight;
     window.scrollTo({
       top: scrollDistance,
       behavior: 'smooth',
