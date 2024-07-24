@@ -14,19 +14,7 @@ import {
   Divider,
 } from '@mui/material';
 import {Add as AddIcon, Clear as ClearIcon} from '@mui/icons-material';
-
-interface Device {
-  id: number;
-  name: string;
-  quantity: number;
-  volts: number;
-  amps: number;
-  ampType: 'A' | 'mA';
-  maxWatts: number;
-  estimatedWatts: number;
-  totalWatts: number;
-  totalEstimatedWatts: number;
-}
+import {Device} from '../model/Device';
 
 interface PowerUsageFormProps {
   onDataChange: (
@@ -391,24 +379,21 @@ const PowerUsageForm: React.FC<PowerUsageFormProps> = ({onDataChange}) => {
       >
         Add Device
       </Button>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <Typography variant="h6" sx={{color: '#FCB1E5'}}>
-            Totals
-          </Typography>
-        </Grid>
-        <Grid item xs={6}>
-          <Typography>
-            Total Max Watts: {calculateTotals(devices).totalMaxWatts.toFixed(2)}
-          </Typography>
-        </Grid>
-        <Grid item xs={6}>
-          <Typography>
-            Total Estimated Watts:{' '}
-            {calculateTotals(devices).totalEstimatedWatts.toFixed(2)}
-          </Typography>
-        </Grid>
-      </Grid>
+
+      <Box sx={{mt: 1}}>
+        <Typography variant="h6" sx={{color: '#FCB1E5'}}>
+          Totals
+        </Typography>
+
+        <Typography>
+          Max Watts: {calculateTotals(devices).totalMaxWatts.toFixed(2)}
+        </Typography>
+
+        <Typography>
+          Estimated Watts:{' '}
+          {calculateTotals(devices).totalEstimatedWatts.toFixed(2)}
+        </Typography>
+      </Box>
     </Box>
   );
 };

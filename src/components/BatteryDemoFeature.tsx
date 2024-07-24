@@ -20,7 +20,7 @@ const BatteryDemoFeature: React.FC = () => {
     if (containerRef.current) {
       const containerWidth = Math.min(containerRef.current.offsetWidth, 1920);
       const viewportHeight = window.innerHeight;
-      const targetAspectRatio = 1920 / 1136;
+      const targetAspectRatio = 1920 / 973;
 
       let scaledWidth: number;
       let scaledHeight: number;
@@ -80,6 +80,28 @@ const BatteryDemoFeature: React.FC = () => {
           position: 'relative',
         }}
       >
+        {/*<img
+          src="van640x379.png"
+          srcSet="
+              van640x379.png 640w,
+              van1024x607.png 1024w,
+              van1440x853.png 1440w,
+              van1920x1136.png 1920w
+            "
+          sizes="(max-width: 640px) 640px,
+                   (max-width: 1024px) 1024px,
+                   (max-width: 1440px) 1440px,
+                   1920px"
+          alt="Van interior"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+          }}
+        />*/}
         <Box
           sx={{
             width: `${scaledDimensions.width}px`,

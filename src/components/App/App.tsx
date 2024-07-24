@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Box, Container, Typography, Divider} from '@mui/material';
 import BatteryDemoFeature from '../BatteryDemoFeature';
 import {ThemeProvider} from '@mui/material/styles';
@@ -8,14 +8,55 @@ import TopNav from '../TopNav';
 import BatteryCalculatorForm from '../PowerUsageForm';
 import {Device} from '../../model/Device';
 import {Warning as WarningIcon} from '@mui/icons-material';
+import BatterySelectionForm from '../BatterySelectionForm';
+import {BatteryData} from '../../model/BatteryData';
+import BatteryConfigurationForm from '../BatteryConfigurationForm';
+import {BatteryConfigurationData} from '../../model/BatteryConfigurationData';
+import BatteryMath from '../BatteryMath';
+import {DeviceTotals} from '../../model/DeviceTotals';
 
 function App() {
+  const [devices, setDevices] = useState<Device[]>([]);
+  // TODO: This needs to just move to BatteryMath:
+  const [deviceTotals, setDeviceTotals] = useState<DeviceTotals>({
+    totalMaxWatts: 0,
+    totalEstimatedWatts: 0,
+  });
+  const [batteryData, setBatteryData] = useState<BatteryData>({
+    batteryType: '',
+    volts: 0,
+    ampHours: 0,
+    wattHours: 0,
+    conversionEfficiency: 0,
+    chemistry: 0,
+  });
+  const [batteryConfigurationData, setBatteryConfigurationData] =
+    useState<BatteryConfigurationData>({
+      seriesCount: 1,
+      parallelCount: 1,
+      totalVolts: 0,
+      totalAmpHours: 0,
+      totalWattHours: 0,
+    });
+
   const handleDeviceDataChange = (
-    devices: Device[],
+    updatedDevices: Device[],
     totals: {totalMaxWatts: number; totalEstimatedWatts: number}
   ) => {
-    // Use the updated devices and totals data here
-    console.log(devices, totals);
+    setDevices(updatedDevices);
+    setDeviceTotals(totals);
+    console.log('devices', updatedDevices);
+    console.log('totals', totals);
+  };
+
+  const handleBatteryDataChange = (battery: BatteryData) => {
+    setBatteryData(battery);
+    console.log('battery', battery);
+  };
+
+  const handleBatteryConfigChange = (config: BatteryConfigurationData) => {
+    setBatteryConfigurationData(config);
+    console.log('handleBatteryConfigChange', config);
   };
 
   return (
@@ -30,7 +71,7 @@ function App() {
         <Container>
           <Box sx={{p: 3}}>
             <Typography variant="h2" gutterBottom color="primary">
-              Power Usage Workbook
+              Power Usage Calculator
             </Typography>
             <Typography variant="body1">
               How much battery power does my project need? It depends. What
@@ -45,23 +86,43 @@ function App() {
 
           <Box sx={{p: 3}}>
             <Typography variant="h2" gutterBottom color="primary">
-              Battery Selection
+              Battery Configuration
             </Typography>
             <Typography variant="body1">
               Now that we know what the power requirements are, it's time to
               explore how this project will run on different batteries.
+              Depending on the project, one battery might be enough, one car
+              battery for example. [quick explanation about adding rows/columns
+              of batteries and when it makes sense]. Explore battery
+              configurations here.
             </Typography>
 
-            <p>SOON</p>
+            <BatterySelectionForm onDataChange={handleBatteryDataChange} />
+
+            <Divider sx={{my: 2}} />
+
+            <BatteryConfigurationForm
+              batteryData={batteryData}
+              onConfigChange={handleBatteryConfigChange}
+            />
           </Box>
 
           <Box sx={{p: 3}}>
             <Typography variant="h2" gutterBottom color="primary">
-              Battery Pack Configuration
+              Battery Math
             </Typography>
-            <Typography variant="body1">Description here soon.</Typography>
+            <Typography variant="body1">
+              It's time to total everything up to determine battery run times
+              for the listed devices.
+            </Typography>
 
-            <p>SOON</p>
+            {
+              <BatteryMath
+                batteryConfigurationData={batteryConfigurationData}
+                devices={devices}
+                deviceTotals={deviceTotals}
+              />
+            }
           </Box>
 
           <Box sx={{p: 3}}>
