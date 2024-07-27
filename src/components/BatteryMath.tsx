@@ -38,10 +38,10 @@ const BatteryMath: React.FC<BatteryMathProps> = ({
           Watts
         </Typography>
         <Typography variant="body1" gutterBottom>
-          Total Max Watts: {totalMaxWatts} A
+          Total Max Watts: {totalMaxWatts}
         </Typography>
         <Typography variant="body1" gutterBottom>
-          Total Estimated Watts: {totalEstimatedWatts} Ah
+          Total Estimated Watts: {totalEstimatedWatts}
         </Typography>
       </Box>
       <Box sx={{mb: 2}}>

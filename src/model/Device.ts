@@ -9,4 +9,5 @@ export interface Device {
   estimatedWatts: number;
   totalWatts: number;
   totalEstimatedWatts: number;
+  error: string;
 }

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {Box, Container, Typography, Divider} from '@mui/material';
 import BatteryDemoFeature from '../BatteryDemoFeature';
 import {ThemeProvider} from '@mui/material/styles';
@@ -17,7 +17,6 @@ import {DeviceTotals} from '../../model/DeviceTotals';
 
 function App() {
   const [devices, setDevices] = useState<Device[]>([]);
-  // TODO: This needs to just move to BatteryMath:
   const [deviceTotals, setDeviceTotals] = useState<DeviceTotals>({
     totalMaxWatts: 0,
     totalEstimatedWatts: 0,
@@ -39,25 +38,24 @@ function App() {
       totalWattHours: 0,
     });
 
-  const handleDeviceDataChange = (
-    updatedDevices: Device[],
-    totals: {totalMaxWatts: number; totalEstimatedWatts: number}
-  ) => {
-    setDevices(updatedDevices);
-    setDeviceTotals(totals);
-    console.log('devices', updatedDevices);
-    console.log('totals', totals);
-  };
+  const handleDeviceDataChange = useCallback(
+    (updatedDevices: Device[], totals: DeviceTotals) => {
+      setDevices(updatedDevices);
+      setDeviceTotals(totals);
+    },
+    []
+  );
 
-  const handleBatteryDataChange = (battery: BatteryData) => {
+  const handleBatteryDataChange = useCallback((battery: BatteryData) => {
     setBatteryData(battery);
-    console.log('battery', battery);
-  };
+  }, []);
 
-  const handleBatteryConfigChange = (config: BatteryConfigurationData) => {
-    setBatteryConfigurationData(config);
-    console.log('handleBatteryConfigChange', config);
-  };
+  const handleBatteryConfigChange = useCallback(
+    (config: BatteryConfigurationData) => {
+      setBatteryConfigurationData(config);
+    },
+    []
+  );
 
   return (
     <ThemeProvider theme={theme}>
@@ -71,7 +69,7 @@ function App() {
         <Container>
           <Box sx={{p: 3}}>
             <Typography variant="h2" gutterBottom color="primary">
-              Power Usage Calculator
+              Device Power Usage
             </Typography>
             <Typography variant="body1">
               How much battery power does my project need? It depends. What
