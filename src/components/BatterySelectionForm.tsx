@@ -28,7 +28,6 @@ const presetBatteryData: {[key: string]: BatteryData} = {
     volts: 13.5,
     ampHours: 100,
     wattHours: 1350,
-    conversionEfficiency: 0.89,
     chemistry: 0.5,
   },
   'E-Bike Battery Pack': {
@@ -36,7 +35,6 @@ const presetBatteryData: {[key: string]: BatteryData} = {
     volts: 37,
     ampHours: 14.25,
     wattHours: 527.25,
-    conversionEfficiency: 0.95,
     chemistry: 0.8,
   },
   '10000 mAh Cell Phone Charger': {
@@ -44,7 +42,6 @@ const presetBatteryData: {[key: string]: BatteryData} = {
     volts: 5,
     ampHours: 20,
     wattHours: 100,
-    conversionEfficiency: 0.95,
     chemistry: 0.8,
   },
   Custom: {
@@ -52,7 +49,6 @@ const presetBatteryData: {[key: string]: BatteryData} = {
     volts: 0,
     ampHours: 0,
     wattHours: 0,
-    conversionEfficiency: 0,
     chemistry: 0,
   },
 };
@@ -163,24 +159,6 @@ const BatterySelectionForm: React.FC<BatterySelectionFormProps> = ({
               type="number"
               value={batteryData.wattHours || ''}
               onChange={(e) => handleChange('wattHours', e.target.value)}
-              fullWidth
-              margin="normal"
-              InputLabelProps={{shrink: true}}
-            />
-          </Tooltip>
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <Tooltip
-            title="The efficiency of converting stored energy to usable energy. A value between 0 and 1, where 1 is 100% efficient"
-            placement="top-start"
-          >
-            <TextField
-              label="Conversion Efficiency"
-              type="number"
-              value={batteryData.conversionEfficiency || ''}
-              onChange={(e) =>
-                handleChange('conversionEfficiency', e.target.value)
-              }
               fullWidth
               margin="normal"
               InputLabelProps={{shrink: true}}

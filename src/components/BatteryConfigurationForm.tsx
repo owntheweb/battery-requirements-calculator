@@ -90,21 +90,40 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
                     {colIndex === 0 && (
                       <line
                         x1={(cellWidth - batteryWidth) / 2}
-                        y1={cellHeight}
+                        y1={cellHeight - cellHeight / 12}
                         x2={(cellWidth - batteryWidth) / 2}
-                        y2={cellHeight + (cellHeight - batteryHeight) / 2}
+                        y2={
+                          cellHeight -
+                          cellHeight / 12 +
+                          (cellHeight - batteryHeight) / 2
+                        }
                         stroke="white"
                         strokeWidth="2"
                       />
                     )}
 
                     {/* Middle vertical lines (intersecting with horizontal lines) */}
-                    {colIndex < seriesCount && (
+                    {/*colIndex < seriesCount && (
                       <line
                         x1={cellWidth - (cellWidth - batteryWidth) / 4}
                         y1={cellHeight}
                         x2={cellWidth - (cellWidth - batteryWidth) / 4}
                         y2={cellHeight + (cellHeight - batteryHeight) / 2}
+                        stroke="white"
+                        strokeWidth="2"
+                      />
+                    )*/}
+                    {/* right vertical line only for the right column */}
+                    {colIndex === seriesCount - 1 && (
+                      <line
+                        x1={cellWidth - (cellWidth - batteryWidth) / 4}
+                        y1={cellHeight - cellHeight / 12}
+                        x2={cellWidth - (cellWidth - batteryWidth) / 4}
+                        y2={
+                          cellHeight -
+                          cellHeight / 12 +
+                          (cellHeight - batteryHeight) / 2
+                        }
                         stroke="white"
                         strokeWidth="2"
                       />

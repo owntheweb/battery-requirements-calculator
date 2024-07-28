@@ -3,6 +3,5 @@ export interface BatteryData {
   volts: number;
   ampHours: number;
   wattHours: number;
-  conversionEfficiency: number;
   chemistry: number;
 }

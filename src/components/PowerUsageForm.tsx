@@ -19,6 +19,7 @@ import {
   Clear as ClearIcon,
   Calculate as CalculateIcon,
 } from '@mui/icons-material';
+import {v4 as uuidv4} from 'uuid';
 import {Device} from '../model/Device';
 
 interface PowerUsageFormProps {
@@ -31,7 +32,7 @@ interface PowerUsageFormProps {
 const PowerUsageForm: React.FC<PowerUsageFormProps> = ({onDataChange}) => {
   const [devices, setDevices] = useState<Device[]>([
     {
-      id: Date.now(),
+      id: uuidv4(),
       name: '',
       quantity: 1,
       volts: 0,
@@ -39,6 +40,7 @@ const PowerUsageForm: React.FC<PowerUsageFormProps> = ({onDataChange}) => {
       ampType: 'A',
       maxWatts: 0,
       estimatedWatts: 0,
+      hoursRunPerDay: 0,
       totalWatts: 0,
       totalEstimatedWatts: 0,
       error: '',
@@ -50,7 +52,7 @@ const PowerUsageForm: React.FC<PowerUsageFormProps> = ({onDataChange}) => {
     setDevices((prevDevices) => [
       ...prevDevices,
       {
-        id: Date.now(),
+        id: uuidv4(),
         name: '',
         quantity: 1,
         volts: 0,
@@ -59,39 +61,18 @@ const PowerUsageForm: React.FC<PowerUsageFormProps> = ({onDataChange}) => {
         maxWatts: 0,
         estimatedWatts: 0,
         totalWatts: 0,
+        hoursRunPerDay: 0,
         totalEstimatedWatts: 0,
         error: '',
       },
     ]);
   }, [devices]);
 
-  const removeDevice = useCallback((id: number) => {
+  const removeDevice = useCallback((id: string) => {
     setDevices((prevDevices) =>
       prevDevices.filter((device) => device.id !== id)
     );
   }, []);
-
-  const updateDevice = useCallback(
-    (id: number, field: keyof Device, value: string | number) => {
-      setDevices((prevDevices) =>
-        prevDevices.map((device) => {
-          if (device.id === id) {
-            const updatedDevice = {
-              ...device,
-              [field]:
-                field === 'name' || field === 'ampType'
-                  ? value
-                  : parseFloat(value as string) || 0,
-              error: '',
-            };
-            return validateDevice(updatedDevice);
-          }
-          return device;
-        })
-      );
-    },
-    []
-  );
 
   const validateDevice = useCallback((device: Device): Device => {
     const updatedDevice = {...device};
@@ -115,27 +96,24 @@ const PowerUsageForm: React.FC<PowerUsageFormProps> = ({onDataChange}) => {
     return updatedDevice;
   }, []);
 
-  const calculateDeviceValues = useCallback(
-    (device: Device): Device => {
-      const updatedDevice = {...device};
-      const {quantity, volts, amps, maxWatts, ampType} = device;
-
-      const effectiveAmps = ampType === 'mA' ? amps * 0.001 : amps;
-
-      if (volts && effectiveAmps && !maxWatts) {
-        updatedDevice.maxWatts = parseFloat((volts * effectiveAmps).toFixed(2));
-      } else if (volts && maxWatts && !amps) {
-        updatedDevice.amps = parseFloat(
-          ((maxWatts / volts) * (ampType === 'mA' ? 1000 : 1)).toFixed(2)
-        );
-      } else if (effectiveAmps && maxWatts && !volts) {
-        updatedDevice.volts = parseFloat((maxWatts / effectiveAmps).toFixed(2));
-      }
-
-      updatedDevice.totalWatts = quantity * updatedDevice.maxWatts;
-      updatedDevice.totalEstimatedWatts = quantity * device.estimatedWatts;
-
-      return validateDevice(updatedDevice);
+  const updateDevice = useCallback(
+    (id: string, field: keyof Device, value: string | number) => {
+      setDevices((prevDevices) =>
+        prevDevices.map((device) => {
+          if (device.id === id) {
+            const updatedDevice = {
+              ...device,
+              [field]:
+                field === 'name' || field === 'ampType'
+                  ? value
+                  : parseFloat(value as string) || 0,
+              error: '',
+            };
+            return validateDevice(updatedDevice);
+          }
+          return device;
+        })
+      );
     },
     [validateDevice]
   );
@@ -298,7 +276,7 @@ const PowerUsageForm: React.FC<PowerUsageFormProps> = ({onDataChange}) => {
   );
 
   const handleAmpTypeChange = useCallback(
-    (deviceId: number, newAmpType: 'A' | 'mA') => {
+    (deviceId: string, newAmpType: 'A' | 'mA') => {
       setDevices((prevDevices) =>
         prevDevices.map((device) => {
           if (device.id === deviceId) {
@@ -352,7 +330,7 @@ const PowerUsageForm: React.FC<PowerUsageFormProps> = ({onDataChange}) => {
         <React.Fragment key={device.id}>
           {index > 0 && <Divider sx={{my: 2}} />}
           <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={4}>
               {renderTextField(
                 device,
                 'name',
@@ -420,6 +398,14 @@ const PowerUsageForm: React.FC<PowerUsageFormProps> = ({onDataChange}) => {
                 'estimatedWatts',
                 'Estimated Watts',
                 'Devices may not always use max watts. E.g., a laptop will draw max watts when playing an AAA game, yet far less when browsing social media.'
+              )}
+            </Grid>
+            <Grid item xs={6} sm={4} md={2}>
+              {renderTextField(
+                device,
+                'hoursRunPerDay',
+                'Hours Run Per Day',
+                "How many hours will this device be running in a day? This will help determine battery run time later. Example: An air fryer won't be running 24/7"
               )}
             </Grid>
             <Grid item xs={6} sm={4} md={2}>

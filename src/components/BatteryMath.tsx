@@ -15,7 +15,6 @@ const BatteryMath: React.FC<BatteryMathProps> = ({
   devices,
   deviceTotals,
 }) => {
-  // TODO: Do the math here instead of passing it in (no longer needed in device list I think)
   const totalMaxWatts = deviceTotals.totalMaxWatts;
   const totalEstimatedWatts = deviceTotals.totalEstimatedWatts;
 

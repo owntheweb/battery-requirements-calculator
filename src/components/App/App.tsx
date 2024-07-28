@@ -26,7 +26,6 @@ function App() {
     volts: 0,
     ampHours: 0,
     wattHours: 0,
-    conversionEfficiency: 0,
     chemistry: 0,
   });
   const [batteryConfigurationData, setBatteryConfigurationData] =
