@@ -1,21 +1,23 @@
 import React, {useCallback, useState} from 'react';
-import {Box, Container, Typography, Divider} from '@mui/material';
+import {Box, Container, Typography, Divider, Button} from '@mui/material';
 import BatteryDemoFeature from '../BatteryDemoFeature';
 import {ThemeProvider} from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import theme from '../../theme';
 import TopNav from '../TopNav';
 import BatteryCalculatorForm from '../PowerUsageForm';
-import {Device} from '../../model/Device';
 import {Warning as WarningIcon} from '@mui/icons-material';
 import BatterySelectionForm from '../BatterySelectionForm';
-import {BatteryData} from '../../model/BatteryData';
 import BatteryConfigurationForm from '../BatteryConfigurationForm';
-import {BatteryConfigurationData} from '../../model/BatteryConfigurationData';
 import BatteryMath from '../BatteryMath';
+import {Device} from '../../model/Device';
+import {BatteryData} from '../../model/BatteryData';
+import {BatteryConfigurationData} from '../../model/BatteryConfigurationData';
 import {DeviceTotals} from '../../model/DeviceTotals';
+import {saveAs} from 'file-saver';
+import Papa from 'papaparse';
 
-function App() {
+const App: React.FC = () => {
   const [devices, setDevices] = useState<Device[]>([]);
   const [deviceTotals, setDeviceTotals] = useState<DeviceTotals>({
     totalMaxWatts: 0,
@@ -55,6 +57,57 @@ function App() {
     },
     []
   );
+
+  // Export data as JSON
+  const exportData = () => {
+    const data = {
+      version: '1.0',
+      devices,
+      batteryData,
+      batteryConfigurationData,
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: 'application/json',
+    });
+    saveAs(blob, 'battery_calculator_data.json');
+  };
+
+  // Export Device Power Usage as CSV
+  const exportDevicePowerUsageCSV = () => {
+    const csv = Papa.unparse(devices);
+    const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+    saveAs(blob, 'device_power_usage.csv');
+  };
+
+  // Export Battery Selection/Configuration as CSV
+  const exportBatteryConfigCSV = () => {
+    const data = [
+      {
+        ...batteryData,
+        ...batteryConfigurationData,
+      },
+    ];
+    const csv = Papa.unparse(data);
+    const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+    saveAs(blob, 'battery_configuration.csv');
+  };
+
+  // Export Battery Math as CSV
+  const exportBatteryMathCSV = () => {
+    const data = [
+      {
+        totalMaxWatts: deviceTotals.totalMaxWatts,
+        totalEstimatedWatts: deviceTotals.totalEstimatedWatts,
+        totalBatteryVolts: batteryConfigurationData.totalVolts,
+        totalBatteryAmpHours: batteryConfigurationData.totalAmpHours,
+        totalBatteryWattHours: batteryConfigurationData.totalWattHours,
+        // TODO: Get values from battery math soon to add to this.
+      },
+    ];
+    const csv = Papa.unparse(data);
+    const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+    saveAs(blob, 'battery_math.csv');
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -122,6 +175,37 @@ function App() {
           </Box>
 
           <Box sx={{p: 3}}>
+            <Typography variant="h2" gutterBottom color="primary">
+              Data Tools
+            </Typography>
+            <Typography variant="body1">
+              Use these tools to export or import data. All data can be exported
+              as JSON for later use, or specific sections can be exported as CSV
+              for use in spreadsheet applications.
+            </Typography>
+            <Box sx={{mt: 2, display: 'flex', gap: 2}}>
+              <Button variant="contained" color="primary" onClick={exportData}>
+                Export All Data (JSON)
+              </Button>
+              <Button variant="contained" component="label">
+                Import Data (JSON)
+                <input type="file" hidden accept=".json" onChange={() => {}} />
+              </Button>
+            </Box>
+            <Box sx={{mt: 2, display: 'flex', gap: 2}}>
+              <Button variant="outlined" onClick={exportDevicePowerUsageCSV}>
+                Export Device Power Usage (CSV)
+              </Button>
+              <Button variant="outlined" onClick={exportBatteryConfigCSV}>
+                Export Battery Config (CSV)
+              </Button>
+              <Button variant="outlined" onClick={exportBatteryMathCSV}>
+                Export Battery Math (CSV)
+              </Button>
+            </Box>
+          </Box>
+
+          <Box sx={{p: 3}}>
             <Typography variant="h2" gutterBottom color="error">
               <WarningIcon /> Disclaimer
             </Typography>
@@ -144,6 +228,6 @@ function App() {
       </Box>
     </ThemeProvider>
   );
-}
+};
 
 export default App;

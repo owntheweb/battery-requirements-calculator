@@ -3,7 +3,6 @@ import {TextField, Grid, Box, useTheme, Typography} from '@mui/material';
 import BatteryFullIcon from '@mui/icons-material/BatteryFull';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
-
 import {BatteryData} from '../model/BatteryData';
 import {BatteryConfigurationData} from '../model/BatteryConfigurationData';
 
@@ -16,27 +15,41 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
   batteryData,
   onConfigChange,
 }) => {
-  const [seriesCount, setSeriesCount] = useState(1);
-  const [parallelCount, setParallelCount] = useState(1);
+  const [config, setConfig] = useState<BatteryConfigurationData>({
+    seriesCount: 1,
+    parallelCount: 1,
+    totalVolts: 0,
+    totalAmpHours: 0,
+    totalWattHours: 0,
+  });
   const theme = useTheme();
 
-  const configData = useMemo(() => {
-    const totalVolts = batteryData.volts * seriesCount;
-    const totalAmpHours = batteryData.ampHours * parallelCount;
+  // Calculate totals when config or batteryData changes
+  useEffect(() => {
+    const totalVolts = batteryData.volts * config.seriesCount;
+    const totalAmpHours = batteryData.ampHours * config.parallelCount;
     const totalWattHours = totalVolts * totalAmpHours;
 
-    return {
-      seriesCount,
-      parallelCount,
+    const newConfig = {
+      ...config,
       totalVolts,
       totalAmpHours,
       totalWattHours,
     };
-  }, [batteryData.volts, batteryData.ampHours, seriesCount, parallelCount]);
 
-  useEffect(() => {
-    onConfigChange(configData);
-  }, [onConfigChange, configData]);
+    setConfig(newConfig);
+    onConfigChange(newConfig);
+  }, [batteryData, config.seriesCount, config.parallelCount, onConfigChange]);
+
+  const handleChange = (
+    field: 'seriesCount' | 'parallelCount',
+    value: number
+  ) => {
+    setConfig((prevConfig) => ({
+      ...prevConfig,
+      [field]: Math.max(1, value),
+    }));
+  };
 
   const renderBatteryGrid = () => {
     const cellWidth = 80;
@@ -44,8 +57,8 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
     const batteryWidth = 60;
     const batteryHeight = 60;
     const iconSize = 40;
-    const totalWidth = seriesCount * cellWidth + iconSize * 2; // Add space for icons
-    const totalHeight = parallelCount * cellHeight;
+    const totalWidth = config.seriesCount * cellWidth + iconSize * 2; // Add space for icons
+    const totalHeight = config.parallelCount * cellHeight;
 
     return (
       <svg
@@ -70,9 +83,9 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
 
         {/* Battery grid */}
         <g transform={`translate(${iconSize}, 0)`}>
-          {Array.from({length: parallelCount}).map((_, rowIndex) => (
+          {Array.from({length: config.parallelCount}).map((_, rowIndex) => (
             <g key={`row-${rowIndex}`}>
-              {Array.from({length: seriesCount}).map((_, colIndex) => (
+              {Array.from({length: config.seriesCount}).map((_, colIndex) => (
                 <g
                   key={`battery-${rowIndex}-${colIndex}`}
                   transform={`translate(${colIndex * cellWidth}, ${
@@ -94,7 +107,7 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
                     />
                   </foreignObject>
                   {/* Horizontal lines */}
-                  {colIndex < seriesCount - 1 && (
+                  {colIndex < config.seriesCount - 1 && (
                     <line
                       x1={cellWidth - (cellWidth - batteryWidth) / 4}
                       y1={cellHeight / 2}
@@ -105,7 +118,7 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
                     />
                   )}
                   {/* Vertical lines */}
-                  {rowIndex < parallelCount - 1 && (
+                  {rowIndex < config.parallelCount - 1 && (
                     <>
                       {/* Left vertical line (only for the first column) */}
                       {colIndex === 0 && (
@@ -123,7 +136,7 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
                         />
                       )}
                       {/* Right vertical line (only for the last column) */}
-                      {colIndex === seriesCount - 1 && (
+                      {colIndex === config.seriesCount - 1 && (
                         <line
                           x1={cellWidth - (cellWidth - batteryWidth) / 4}
                           y1={cellHeight - cellHeight / 12}
@@ -170,9 +183,9 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
           <TextField
             label="Batteries In Series"
             type="number"
-            value={seriesCount}
+            value={config.seriesCount}
             onChange={(e) =>
-              setSeriesCount(Math.max(1, parseInt(e.target.value) || 1))
+              handleChange('seriesCount', parseInt(e.target.value) || 1)
             }
             fullWidth
             margin="normal"
@@ -182,9 +195,9 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
           <TextField
             label="Parallel Battery Strings"
             type="number"
-            value={parallelCount}
+            value={config.parallelCount}
             onChange={(e) =>
-              setParallelCount(Math.max(1, parseInt(e.target.value) || 1))
+              handleChange('parallelCount', parseInt(e.target.value) || 1)
             }
             fullWidth
             margin="normal"
@@ -221,7 +234,7 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
               Volts:
             </Typography>
             <Typography variant="body1" align="center">
-              {configData.totalVolts.toFixed(2)}V
+              {config.totalVolts.toFixed(2)}V
             </Typography>
           </Grid>
           <Grid item xs={4}>
@@ -229,7 +242,7 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
               Amp Hours:
             </Typography>
             <Typography variant="body1" align="center">
-              {configData.totalAmpHours.toFixed(2)}Ah
+              {config.totalAmpHours.toFixed(2)}Ah
             </Typography>
           </Grid>
           <Grid item xs={4}>
@@ -237,7 +250,7 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
               Watt Hours:
             </Typography>
             <Typography variant="body1" align="center">
-              {configData.totalWattHours.toFixed(2)}Wh
+              {config.totalWattHours.toFixed(2)}Wh
             </Typography>
           </Grid>
         </Grid>
