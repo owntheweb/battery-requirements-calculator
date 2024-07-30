@@ -55,7 +55,7 @@ const BatteryMath: React.FC<BatteryMathProps> = ({
     calculation: string,
     result: number | string
   ) => (
-    <Box sx={{ml: 2, mb: 1}}>
+    <Box sx={{mb: 1}}>
       <Typography variant="subtitle1">{title}</Typography>
       <Collapse in={showMath}>
         <Typography variant="body2" color="text.secondary">
@@ -96,12 +96,12 @@ const BatteryMath: React.FC<BatteryMathProps> = ({
         {renderMathSection(
           'Total Max Watts:',
           'Sum of (device max watts × quantity) for all devices',
-          `${totalMaxWatts}W`
+          `${totalMaxWatts.toFixed(2)}W`
         )}
         {renderMathSection(
           'Total Estimated Watts:',
           'Sum of (device estimated watts × quantity) for all devices',
-          `${totalEstimatedWatts}W`
+          `${totalEstimatedWatts.toFixed(2)}W`
         )}
         {renderMathSection(
           'Total Device Amps:',
@@ -130,7 +130,7 @@ const BatteryMath: React.FC<BatteryMathProps> = ({
             batteryConfigurationData.totalVolts /
             batteryConfigurationData.seriesCount
           }V per battery`,
-          `${totalBatteryVolts}V`
+          `${totalBatteryVolts.toFixed(2)}V`
         )}
         {renderMathSection(
           'Total Battery Amp Hours:',
@@ -138,12 +138,12 @@ const BatteryMath: React.FC<BatteryMathProps> = ({
             batteryConfigurationData.totalAmpHours /
             batteryConfigurationData.parallelCount
           }Ah per string`,
-          `${totalBatteryAmpHours}Ah`
+          `${totalBatteryAmpHours.toFixed(2)}Ah`
         )}
         {renderMathSection(
           'Total Battery Watt Hours:',
           `${totalBatteryVolts}V × ${totalBatteryAmpHours}Ah`,
-          `${totalBatteryWattHours}Wh`
+          `${totalBatteryWattHours.toFixed(2)}Wh`
         )}
       </Box>
 

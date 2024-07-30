@@ -218,7 +218,7 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
         <Grid container spacing={2} sx={{mt: 1}}>
           <Grid item xs={4}>
             <Typography variant="h6" align="center" color="#FCB1E5">
-              Total Voltage:
+              Volts:
             </Typography>
             <Typography variant="body1" align="center">
               {configData.totalVolts.toFixed(2)} V
@@ -226,7 +226,7 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
           </Grid>
           <Grid item xs={4}>
             <Typography variant="h6" align="center" color="#FCB1E5">
-              Total Amp Hours:
+              Amp Hours:
             </Typography>
             <Typography variant="body1" align="center">
               {configData.totalAmpHours.toFixed(2)} Ah
@@ -234,7 +234,7 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
           </Grid>
           <Grid item xs={4}>
             <Typography variant="h6" align="center" color="#FCB1E5">
-              Total Watt Hours:
+              Watt Hours:
             </Typography>
             <Typography variant="body1" align="center">
               {configData.totalWattHours.toFixed(2)} Wh

@@ -121,13 +121,29 @@ const PowerUsageForm: React.FC<PowerUsageFormProps> = ({onDataChange}) => {
   const calculateTotals = useCallback((devicesToCalculate: Device[]) => {
     return devicesToCalculate.reduce(
       (acc, device) => {
+        const effectiveAmps =
+          device.ampType === 'mA' ? device.amps / 1000 : device.amps;
         return {
           totalMaxWatts: acc.totalMaxWatts + device.totalWatts,
           totalEstimatedWatts:
             acc.totalEstimatedWatts + device.totalEstimatedWatts,
+          totalDeviceAmps:
+            acc.totalDeviceAmps + effectiveAmps * device.quantity,
+          dailyUsageEstimated:
+            acc.dailyUsageEstimated +
+            device.estimatedWatts * device.quantity * device.hoursRunPerDay,
+          dailyUsageMax:
+            acc.dailyUsageMax +
+            device.maxWatts * device.quantity * device.hoursRunPerDay,
         };
       },
-      {totalMaxWatts: 0, totalEstimatedWatts: 0}
+      {
+        totalMaxWatts: 0,
+        totalEstimatedWatts: 0,
+        totalDeviceAmps: 0,
+        dailyUsageEstimated: 0,
+        dailyUsageMax: 0,
+      }
     );
   }, []);
 
@@ -458,9 +474,19 @@ const PowerUsageForm: React.FC<PowerUsageFormProps> = ({onDataChange}) => {
         <Typography variant="h6" sx={{color: '#FCB1E5'}}>
           Totals
         </Typography>
-        <Typography>Max Watts: {totals.totalMaxWatts.toFixed(2)}</Typography>
         <Typography>
           Estimated Watts: {totals.totalEstimatedWatts.toFixed(2)}
+        </Typography>
+        <Typography>Max Watts: {totals.totalMaxWatts.toFixed(2)}</Typography>
+        <Typography>
+          Total Device Amps: {totals.totalDeviceAmps.toFixed(2)}
+        </Typography>
+        <Typography>
+          Daily Usage (Estimated Watts): {totals.dailyUsageEstimated.toFixed(2)}{' '}
+          Wh
+        </Typography>
+        <Typography>
+          Daily Usage (Max Watts): {totals.dailyUsageMax.toFixed(2)} Wh
         </Typography>
       </Box>
     </Box>
