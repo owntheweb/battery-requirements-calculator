@@ -461,6 +461,7 @@ const PowerUsageForm: React.FC<PowerUsageFormProps> = ({onDataChange}) => {
           </Grid>
         </React.Fragment>
       ))}
+
       <Button
         startIcon={<AddIcon />}
         onClick={addDevice}
@@ -472,22 +473,45 @@ const PowerUsageForm: React.FC<PowerUsageFormProps> = ({onDataChange}) => {
 
       <Box sx={{mt: 1}}>
         <Typography variant="h6" sx={{color: '#FCB1E5'}}>
-          Totals
+          Power Usage Totals
         </Typography>
-        <Typography>
-          Estimated Watts: {totals.totalEstimatedWatts.toFixed(2)}
-        </Typography>
-        <Typography>Max Watts: {totals.totalMaxWatts.toFixed(2)}</Typography>
-        <Typography>
-          Total Device Amps: {totals.totalDeviceAmps.toFixed(2)}
-        </Typography>
-        <Typography>
-          Daily Usage (Estimated Watts): {totals.dailyUsageEstimated.toFixed(2)}{' '}
-          Wh
-        </Typography>
-        <Typography>
-          Daily Usage (Max Watts): {totals.dailyUsageMax.toFixed(2)} Wh
-        </Typography>
+
+        <Box sx={{mb: 1}}>
+          <Typography variant="subtitle1">Estimated Watts:</Typography>
+          <Typography variant="body1">
+            {totals.totalEstimatedWatts.toFixed(2)}W
+          </Typography>
+        </Box>
+
+        <Box sx={{mb: 1}}>
+          <Typography variant="subtitle1">Max Watts:</Typography>
+          <Typography variant="body1">
+            {totals.totalMaxWatts.toFixed(2)}W
+          </Typography>
+        </Box>
+
+        <Box sx={{mb: 1}}>
+          <Typography variant="subtitle1">Total Device Amps:</Typography>
+          <Typography variant="body1">
+            {totals.totalDeviceAmps.toFixed(2)}A
+          </Typography>
+        </Box>
+
+        <Box sx={{mb: 1}}>
+          <Typography variant="subtitle1">
+            Daily Usage (Estimated Watts):
+          </Typography>
+          <Typography variant="body1">
+            {totals.dailyUsageEstimated.toFixed(2)}Wh
+          </Typography>
+        </Box>
+
+        <Box sx={{mb: 1}}>
+          <Typography variant="subtitle1">Daily Usage (Max Watts):</Typography>
+          <Typography variant="body1">
+            {totals.dailyUsageMax.toFixed(2)}Wh
+          </Typography>
+        </Box>
       </Box>
     </Box>
   );
