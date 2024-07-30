@@ -71,7 +71,7 @@ function App() {
               Device Power Usage
             </Typography>
             <Typography variant="body1">
-              How much battery power does my project need? It depends. What
+              How much battery power does a project need? It depends. What
               devices are being used? How long should the project run before a
               recharge is needed? This website will help guide in this process.
               First, let's start with the collecting all the devices to see how
@@ -86,12 +86,11 @@ function App() {
               Battery Configuration
             </Typography>
             <Typography variant="body1">
-              Now that we know what the power requirements are, it's time to
-              explore how this project will run on different batteries.
-              Depending on the project, one battery might be enough, one car
-              battery for example. [quick explanation about adding rows/columns
-              of batteries and when it makes sense]. Explore battery
-              configurations here.
+              Now that the power requirements are known, it's time to explore
+              how this project will run on different batteries. Depending on the
+              project, one battery might be enough, one car battery for example.
+              It will require a much larger set of rechargeable 18560 batteries
+              for example to power a an air fryer (configurable below).
             </Typography>
 
             <BatterySelectionForm onDataChange={handleBatteryDataChange} />

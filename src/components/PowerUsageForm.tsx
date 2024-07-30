@@ -40,7 +40,7 @@ const PowerUsageForm: React.FC<PowerUsageFormProps> = ({onDataChange}) => {
       ampType: 'A',
       maxWatts: 0,
       estimatedWatts: 0,
-      hoursRunPerDay: 0,
+      hoursRunPerDay: 24,
       totalWatts: 0,
       totalEstimatedWatts: 0,
       error: '',
@@ -61,7 +61,7 @@ const PowerUsageForm: React.FC<PowerUsageFormProps> = ({onDataChange}) => {
         maxWatts: 0,
         estimatedWatts: 0,
         totalWatts: 0,
-        hoursRunPerDay: 0,
+        hoursRunPerDay: 24,
         totalEstimatedWatts: 0,
         error: '',
       },
@@ -405,7 +405,7 @@ const PowerUsageForm: React.FC<PowerUsageFormProps> = ({onDataChange}) => {
                 device,
                 'hoursRunPerDay',
                 'Hours Run Per Day',
-                "How many hours will this device be running in a day? This will help determine battery run time later. Example: An air fryer won't be running 24/7"
+                "How many hours will this device be running in a day? This will help determine battery run time later. Example: An air fryer won't be running 24/7, hopefully..."
               )}
             </Grid>
             <Grid item xs={6} sm={4} md={2}>
