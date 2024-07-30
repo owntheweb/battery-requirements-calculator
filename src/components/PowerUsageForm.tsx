@@ -80,7 +80,7 @@ const PowerUsageForm: React.FC<PowerUsageFormProps> = ({onDataChange}) => {
     const effectiveAmps = ampType === 'mA' ? amps * 0.001 : amps;
 
     if (quantity && volts && effectiveAmps && maxWatts) {
-      const calculatedWatts = parseFloat((volts * effectiveAmps).toFixed(2));
+      const calculatedWatts = volts * effectiveAmps;
       if (Math.abs(calculatedWatts - maxWatts) > 0.01) {
         updatedDevice.error = 'Values do not match. Please check your inputs.';
       } else {
@@ -202,15 +202,13 @@ const PowerUsageForm: React.FC<PowerUsageFormProps> = ({onDataChange}) => {
       const effectiveAmps = ampType === 'mA' ? amps * 0.001 : amps;
 
       if (field === 'volts' && amps && maxWatts) {
-        updatedDevice.volts = parseFloat((maxWatts / effectiveAmps).toFixed(2));
+        updatedDevice.volts = maxWatts / effectiveAmps;
       } else if (field === 'amps' && volts && maxWatts) {
         const calculatedAmps = maxWatts / volts;
         updatedDevice.amps =
-          ampType === 'mA'
-            ? parseFloat((calculatedAmps * 1000).toFixed(2))
-            : parseFloat(calculatedAmps.toFixed(2));
+          ampType === 'mA' ? calculatedAmps * 1000 : calculatedAmps;
       } else if (field === 'maxWatts' && volts && amps) {
-        updatedDevice.maxWatts = parseFloat((volts * effectiveAmps).toFixed(2));
+        updatedDevice.maxWatts = volts * effectiveAmps;
       }
 
       updatedDevice.totalWatts =
