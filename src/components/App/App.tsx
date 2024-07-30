@@ -1,62 +1,31 @@
-import React, {useCallback, useState} from 'react';
+import React from 'react';
 import {Box, Container, Typography, Divider, Button} from '@mui/material';
-import BatteryDemoFeature from '../BatteryDemoFeature';
 import {ThemeProvider} from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import theme from '../../theme';
-import TopNav from '../TopNav';
-import BatteryCalculatorForm from '../PowerUsageForm';
 import {Warning as WarningIcon} from '@mui/icons-material';
-import BatterySelectionForm from '../BatterySelectionForm';
-import BatteryConfigurationForm from '../BatteryConfigurationForm';
-import BatteryMath from '../BatteryMath';
-import {Device} from '../../model/Device';
-import {BatteryData} from '../../model/BatteryData';
-import {BatteryConfigurationData} from '../../model/BatteryConfigurationData';
-import {DeviceTotals} from '../../model/DeviceTotals';
 import {saveAs} from 'file-saver';
 import Papa from 'papaparse';
 
+import BatteryDemoFeature from '../BatteryDemoFeature';
+import theme from '../../theme';
+import TopNav from '../TopNav';
+import PowerUsageForm from '../PowerUsageForm';
+import BatterySelectionForm from '../BatterySelectionForm';
+import BatteryConfigurationForm from '../BatteryConfigurationForm';
+import BatteryMath from '../BatteryMath';
+import {useBatteryCalculator} from '../../hooks/useBatteryCalculator';
+
 const App: React.FC = () => {
-  const [devices, setDevices] = useState<Device[]>([]);
-  const [deviceTotals, setDeviceTotals] = useState<DeviceTotals>({
-    totalMaxWatts: 0,
-    totalEstimatedWatts: 0,
-  });
-  const [batteryData, setBatteryData] = useState<BatteryData>({
-    batteryType: '',
-    volts: 0,
-    ampHours: 0,
-    wattHours: 0,
-    chemistry: 0,
-  });
-  const [batteryConfigurationData, setBatteryConfigurationData] =
-    useState<BatteryConfigurationData>({
-      seriesCount: 1,
-      parallelCount: 1,
-      totalVolts: 0,
-      totalAmpHours: 0,
-      totalWattHours: 0,
-    });
-
-  const handleDeviceDataChange = useCallback(
-    (updatedDevices: Device[], totals: DeviceTotals) => {
-      setDevices(updatedDevices);
-      setDeviceTotals(totals);
-    },
-    []
-  );
-
-  const handleBatteryDataChange = useCallback((battery: BatteryData) => {
-    setBatteryData(battery);
-  }, []);
-
-  const handleBatteryConfigChange = useCallback(
-    (config: BatteryConfigurationData) => {
-      setBatteryConfigurationData(config);
-    },
-    []
-  );
+  const {
+    batteryData,
+    batteryConfigurationData,
+    devices,
+    deviceTotals,
+    batteryMathData,
+    updateBatteryData,
+    updateBatteryConfig,
+    updateDevices,
+  } = useBatteryCalculator();
 
   // Export data as JSON
   const exportData = () => {
@@ -65,6 +34,30 @@ const App: React.FC = () => {
       devices,
       batteryData,
       batteryConfigurationData,
+      batteryMathData: {
+        totalMaxWatts: Number(batteryMathData.totalMaxWatts.toFixed(2)),
+        totalEstimatedWatts: Number(
+          batteryMathData.totalEstimatedWatts.toFixed(2)
+        ),
+        totalDeviceAmps: Number(batteryMathData.totalDeviceAmps.toFixed(2)),
+        dailyUsageEstimated: Number(
+          batteryMathData.dailyUsageEstimated.toFixed(2)
+        ),
+        dailyUsageMax: Number(batteryMathData.dailyUsageMax.toFixed(2)),
+        totalBatteryVolts: Number(batteryMathData.totalBatteryVolts.toFixed(2)),
+        totalBatteryAmpHours: Number(
+          batteryMathData.totalBatteryAmpHours.toFixed(2)
+        ),
+        totalBatteryWattHours: Number(
+          batteryMathData.totalBatteryWattHours.toFixed(2)
+        ),
+        estimatedRunTime: Number(batteryMathData.estimatedRunTime.toFixed(2)),
+        worstCaseRunTime: Number(batteryMathData.worstCaseRunTime.toFixed(2)),
+        estimatedDailyRunTime: Number(
+          batteryMathData.estimatedDailyRunTime.toFixed(2)
+        ),
+        maxDailyRunTime: Number(batteryMathData.maxDailyRunTime.toFixed(2)),
+      },
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], {
       type: 'application/json',
@@ -94,17 +87,7 @@ const App: React.FC = () => {
 
   // Export Battery Math as CSV
   const exportBatteryMathCSV = () => {
-    const data = [
-      {
-        totalMaxWatts: deviceTotals.totalMaxWatts,
-        totalEstimatedWatts: deviceTotals.totalEstimatedWatts,
-        totalBatteryVolts: batteryConfigurationData.totalVolts,
-        totalBatteryAmpHours: batteryConfigurationData.totalAmpHours,
-        totalBatteryWattHours: batteryConfigurationData.totalWattHours,
-        // TODO: Get values from battery math soon to add to this.
-      },
-    ];
-    const csv = Papa.unparse(data);
+    const csv = Papa.unparse([batteryMathData]);
     const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
     saveAs(blob, 'battery_math.csv');
   };
@@ -127,11 +110,11 @@ const App: React.FC = () => {
               How much battery power does a project need? It depends. What
               devices are being used? How long should the project run before a
               recharge is needed? This website will help guide in this process.
-              First, let's start with the collecting all the devices to see how
-              much power they will use.
+              First, let's start with collecting all the devices to see how much
+              power they will use.
             </Typography>
 
-            <BatteryCalculatorForm onDataChange={handleDeviceDataChange} />
+            <PowerUsageForm onDataChange={updateDevices} />
           </Box>
 
           <Box sx={{p: 3}}>
@@ -142,17 +125,17 @@ const App: React.FC = () => {
               Now that the power requirements are known, it's time to explore
               how this project will run on different batteries. Depending on the
               project, one battery might be enough, one car battery for example.
-              It will require a much larger set of rechargeable 18560 batteries
-              for example to power a an air fryer (configurable below).
+              It will require a much larger set of rechargeable 18650 batteries
+              for example to power an air fryer (configurable below).
             </Typography>
 
-            <BatterySelectionForm onDataChange={handleBatteryDataChange} />
+            <BatterySelectionForm onDataChange={updateBatteryData} />
 
             <Divider sx={{my: 2}} />
 
             <BatteryConfigurationForm
               batteryData={batteryData}
-              onConfigChange={handleBatteryConfigChange}
+              onConfigChange={updateBatteryConfig}
             />
           </Box>
 
@@ -165,13 +148,7 @@ const App: React.FC = () => {
               for the listed devices.
             </Typography>
 
-            {
-              <BatteryMath
-                batteryConfigurationData={batteryConfigurationData}
-                devices={devices}
-                deviceTotals={deviceTotals}
-              />
-            }
+            <BatteryMath batteryMathData={batteryMathData} />
           </Box>
 
           <Box sx={{p: 3}}>
@@ -212,16 +189,17 @@ const App: React.FC = () => {
             <Typography variant="body1">
               Use this calculator at your own risk. The creators of this website
               are not responsible for your energy system or any of the
-              equipment/devices that attach to it. We are not responsible to any
-              damage to your vehicle and/or domicile. Electronics and electrical
-              loads may generate heat, this can lead to fires. Working on
-              electrical systems can cause shock that may result in injury or
-              death. Always exercise caution when working on electrical systems.
-              When applying electrical loads to power supply systems, understand
-              the load limitations of conductors and use proper fuses for the
-              load. Failure to head the manufactures instructions may result in
-              damage to self or property. Batteries store large amounts of
-              energy, improper use can result in fire, injury or death
+              equipment/devices that attach to it. We are not responsible for
+              any damage to your vehicle and/or domicile. Electronics and
+              electrical loads may generate heat, which can lead to fires.
+              Working on electrical systems can cause shock that may result in
+              injury or death. Always exercise caution when working on
+              electrical systems. When applying electrical loads to power supply
+              systems, understand the load limitations of conductors and use
+              proper fuses for the load. Failure to heed the manufacturer's
+              instructions may result in damage to self or property. Batteries
+              store large amounts of energy, improper use can result in fire,
+              injury or death.
             </Typography>
           </Box>
         </Container>

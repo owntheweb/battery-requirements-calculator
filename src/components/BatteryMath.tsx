@@ -2,49 +2,14 @@ import React, {useState} from 'react';
 import {Typography, Box, Button, Collapse} from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import {BatteryConfigurationData} from '../model/BatteryConfigurationData';
-import {Device} from '../model/Device';
-import {DeviceTotals} from '../model/DeviceTotals';
+import {BatteryMathData} from '../hooks/useBatteryCalculator';
 
 interface BatteryMathProps {
-  batteryConfigurationData: BatteryConfigurationData;
-  devices: Device[];
-  deviceTotals: DeviceTotals;
+  batteryMathData: BatteryMathData;
 }
 
-const BatteryMath: React.FC<BatteryMathProps> = ({
-  batteryConfigurationData,
-  devices,
-  deviceTotals,
-}) => {
+const BatteryMath: React.FC<BatteryMathProps> = ({batteryMathData}) => {
   const [showMath, setShowMath] = useState(false);
-
-  const totalMaxWatts = deviceTotals.totalMaxWatts;
-  const totalEstimatedWatts = deviceTotals.totalEstimatedWatts;
-
-  const totalDeviceAmps = devices.reduce((sum, device) => {
-    const amps = device.ampType === 'mA' ? device.amps / 1000 : device.amps;
-    return sum + amps * device.quantity;
-  }, 0);
-
-  const totalBatteryVolts = batteryConfigurationData.totalVolts;
-  const totalBatteryAmpHours = batteryConfigurationData.totalAmpHours;
-  const totalBatteryWattHours = batteryConfigurationData.totalWattHours;
-
-  const estimatedRunTime = totalBatteryWattHours / totalEstimatedWatts;
-  const worstCaseRunTime = totalBatteryWattHours / totalMaxWatts;
-
-  const calculateDailyUsage = (useMaxWatts: boolean) => {
-    return devices.reduce((sum, device) => {
-      const watts = useMaxWatts ? device.maxWatts : device.estimatedWatts;
-      return sum + watts * device.quantity * device.hoursRunPerDay;
-    }, 0);
-  };
-
-  const dailyUsageEstimated = calculateDailyUsage(false);
-  const dailyUsageMax = calculateDailyUsage(true);
-  const estimatedDailyRunTime = totalBatteryWattHours / dailyUsageEstimated;
-  const maxDailyRunTime = totalBatteryWattHours / dailyUsageMax;
 
   const toggleShowMath = () => {
     setShowMath(!showMath);
@@ -53,7 +18,8 @@ const BatteryMath: React.FC<BatteryMathProps> = ({
   const renderMathSection = (
     title: string,
     calculation: string,
-    result: number | string
+    result: number,
+    unit: string
   ) => (
     <Box sx={{mb: 1}}>
       <Typography variant="subtitle1">{title}</Typography>
@@ -63,7 +29,7 @@ const BatteryMath: React.FC<BatteryMathProps> = ({
         </Typography>
       </Collapse>
       <Typography variant="body1">
-        {typeof result === 'number' ? result.toFixed(2) : result}
+        {result.toFixed(2)} {unit}
       </Typography>
     </Box>
   );
@@ -96,27 +62,32 @@ const BatteryMath: React.FC<BatteryMathProps> = ({
         {renderMathSection(
           'Total Max Watts:',
           'Sum of (device max watts × quantity) for all devices',
-          `${totalMaxWatts.toFixed(2)}W`
+          batteryMathData.totalMaxWatts,
+          'W'
         )}
         {renderMathSection(
           'Total Estimated Watts:',
           'Sum of (device estimated watts × quantity) for all devices',
-          `${totalEstimatedWatts.toFixed(2)}W`
+          batteryMathData.totalEstimatedWatts,
+          'W'
         )}
         {renderMathSection(
           'Total Device Amps:',
           'Sum of (device amps × quantity) for all devices, converting mA to A where necessary',
-          `${totalDeviceAmps.toFixed(2)}A`
+          batteryMathData.totalDeviceAmps,
+          'A'
         )}
         {renderMathSection(
           'Daily Usage (Estimated Watts):',
           'Sum of (device estimated watts × quantity × hours run per day) for all devices',
-          `${dailyUsageEstimated.toFixed(2)}Wh`
+          batteryMathData.dailyUsageEstimated,
+          'Wh'
         )}
         {renderMathSection(
           'Daily Usage (Max Watts):',
           'Sum of (device max watts × quantity × hours run per day) for all devices',
-          `${dailyUsageMax.toFixed(2)}Wh`
+          batteryMathData.dailyUsageMax,
+          'Wh'
         )}
       </Box>
 
@@ -126,24 +97,21 @@ const BatteryMath: React.FC<BatteryMathProps> = ({
         </Typography>
         {renderMathSection(
           'Total Battery Voltage:',
-          `${batteryConfigurationData.seriesCount} batteries in series × ${
-            batteryConfigurationData.totalVolts /
-            batteryConfigurationData.seriesCount
-          }V per battery`,
-          `${totalBatteryVolts.toFixed(2)}V`
+          'Number of batteries in series × Voltage per battery',
+          batteryMathData.totalBatteryVolts,
+          'V'
         )}
         {renderMathSection(
           'Total Battery Amp Hours:',
-          `${batteryConfigurationData.parallelCount} parallel strings × ${
-            batteryConfigurationData.totalAmpHours /
-            batteryConfigurationData.parallelCount
-          }Ah per string`,
-          `${totalBatteryAmpHours.toFixed(2)}Ah`
+          'Number of parallel strings × Amp Hours per string',
+          batteryMathData.totalBatteryAmpHours,
+          'Ah'
         )}
         {renderMathSection(
           'Total Battery Watt Hours:',
-          `${totalBatteryVolts}V × ${totalBatteryAmpHours}Ah`,
-          `${totalBatteryWattHours.toFixed(2)}Wh`
+          'Total Battery Voltage × Total Battery Amp Hours',
+          batteryMathData.totalBatteryWattHours,
+          'Wh'
         )}
       </Box>
 
@@ -153,25 +121,27 @@ const BatteryMath: React.FC<BatteryMathProps> = ({
         </Typography>
         {renderMathSection(
           'Based on Daily Usage (Estimated Watts):',
-          `${totalBatteryWattHours}Wh ÷ ${dailyUsageEstimated.toFixed(
-            2
-          )}Wh per day`,
-          `${estimatedDailyRunTime.toFixed(2)} days`
+          'Total Battery Watt Hours ÷ Daily Usage (Estimated Watts)',
+          batteryMathData.estimatedDailyRunTime,
+          'days'
         )}
         {renderMathSection(
           'Based on Daily Usage (Max Watts):',
-          `${totalBatteryWattHours}Wh ÷ ${dailyUsageMax.toFixed(2)}Wh per day`,
-          `${maxDailyRunTime.toFixed(2)} days`
+          'Total Battery Watt Hours ÷ Daily Usage (Max Watts)',
+          batteryMathData.maxDailyRunTime,
+          'days'
         )}
         {renderMathSection(
           'All Devices On (Estimated Watts):',
-          `${totalBatteryWattHours}Wh ÷ ${totalEstimatedWatts}W`,
-          `${estimatedRunTime.toFixed(2)} hours`
+          'Total Battery Watt Hours ÷ Total Estimated Watts',
+          batteryMathData.estimatedRunTime,
+          'hours'
         )}
         {renderMathSection(
           'All Devices On (Max Watts):',
-          `${totalBatteryWattHours}Wh ÷ ${totalMaxWatts}W`,
-          `${worstCaseRunTime.toFixed(2)} hours`
+          'Total Battery Watt Hours ÷ Total Max Watts',
+          batteryMathData.worstCaseRunTime,
+          'hours'
         )}
       </Box>
     </Box>
