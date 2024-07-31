@@ -34,6 +34,28 @@ const BatteryMath: React.FC<BatteryMathProps> = ({batteryMathData}) => {
     </Box>
   );
 
+  const renderTimeSection = (
+    title: string,
+    calculation: string,
+    hours: number
+  ) => {
+    const days = hours / 24;
+    return (
+      <Box sx={{mb: 1}}>
+        <Typography variant="subtitle1">{title}</Typography>
+        <Collapse in={showMath}>
+          <Typography variant="body2" color="text.secondary">
+            {calculation}
+          </Typography>
+        </Collapse>
+        <Typography variant="body1">
+          {hours.toFixed(2)} hours{' '}
+          {days >= 1 ? `(${days.toFixed(2)} days)` : ''}
+        </Typography>
+      </Box>
+    );
+  };
+
   return (
     <Box sx={{mt: 2}}>
       <Box sx={{mt: 2}}>
@@ -115,33 +137,33 @@ const BatteryMath: React.FC<BatteryMathProps> = ({batteryMathData}) => {
         )}
       </Box>
 
-      <Box sx={{mb: 2}}>
+      <Box sx={{mb: -1}}>
         <Typography variant="h6" sx={{color: '#FCB1E5'}}>
           Estimated Battery Run Times
         </Typography>
-        {renderMathSection(
+        {renderTimeSection(
           'Based on Daily Usage (Estimated Watts):',
           'Total Battery Watt Hours ÷ Daily Usage (Estimated Watts)',
-          batteryMathData.estimatedDailyRunTime,
-          'days'
+          (batteryMathData.totalBatteryWattHours /
+            batteryMathData.dailyUsageEstimated) *
+            batteryMathData.estimatedDailyRunTime
         )}
-        {renderMathSection(
+        {renderTimeSection(
           'Based on Daily Usage (Max Watts):',
           'Total Battery Watt Hours ÷ Daily Usage (Max Watts)',
-          batteryMathData.maxDailyRunTime,
-          'days'
+          (batteryMathData.totalBatteryWattHours /
+            batteryMathData.dailyUsageMax) *
+            batteryMathData.maxDailyRunTime
         )}
-        {renderMathSection(
+        {renderTimeSection(
           'All Devices On (Estimated Watts):',
           'Total Battery Watt Hours ÷ Total Estimated Watts',
-          batteryMathData.estimatedRunTime,
-          'hours'
+          batteryMathData.estimatedRunTime
         )}
-        {renderMathSection(
+        {renderTimeSection(
           'All Devices On (Max Watts):',
           'Total Battery Watt Hours ÷ Total Max Watts',
-          batteryMathData.worstCaseRunTime,
-          'hours'
+          batteryMathData.worstCaseRunTime
         )}
       </Box>
     </Box>

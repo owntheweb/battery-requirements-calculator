@@ -86,12 +86,12 @@ export function useBatteryCalculator() {
     const totalBatteryAmpHours = batteryConfigurationData.totalAmpHours;
     const totalBatteryWattHours = batteryConfigurationData.totalWattHours;
 
-    // Run time calculations
+    // Run time calculations (all in hours)
     const estimatedRunTime =
       totalBatteryWattHours / deviceTotals.totalEstimatedWatts;
     const worstCaseRunTime = totalBatteryWattHours / deviceTotals.totalMaxWatts;
-    const estimatedDailyRunTime = totalBatteryWattHours / dailyUsageEstimated;
-    const maxDailyRunTime = totalBatteryWattHours / dailyUsageMax;
+    const estimatedDailyRunTime = 24; // One day in hours
+    const maxDailyRunTime = 24; // One day in hours
 
     return {
       totalMaxWatts: deviceTotals.totalMaxWatts,
