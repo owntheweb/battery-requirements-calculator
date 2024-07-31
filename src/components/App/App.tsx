@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback} from 'react';
 import {Box, Container, Typography, Divider, Button} from '@mui/material';
 import {ThemeProvider} from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -92,6 +92,35 @@ const App: React.FC = () => {
     saveAs(blob, 'battery_math.csv');
   };
 
+  const importData = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const importedData = JSON.parse(e.target?.result as string);
+            if (importedData.version === '1.0') {
+              updateDevices(importedData.devices, {
+                totalMaxWatts: importedData.batteryMathData.totalMaxWatts,
+                totalEstimatedWatts:
+                  importedData.batteryMathData.totalEstimatedWatts,
+              });
+              updateBatteryData(importedData.batteryData);
+              updateBatteryConfig(importedData.batteryConfigurationData);
+            } else {
+              console.error('Unsupported file version');
+            }
+          } catch (error) {
+            console.error('Error parsing imported data:', error);
+          }
+        };
+        reader.readAsText(file);
+      }
+    },
+    [updateDevices, updateBatteryData, updateBatteryConfig]
+  );
+
   return (
     <ThemeProvider theme={theme}>
       <Box sx={{minHeight: '100vh', flexGrow: 1}}>
@@ -114,7 +143,10 @@ const App: React.FC = () => {
               power they will use.
             </Typography>
 
-            <PowerUsageForm onDataChange={updateDevices} />
+            <PowerUsageForm
+              onDataChange={updateDevices}
+              importedDevices={devices}
+            />
           </Box>
 
           <Box sx={{p: 3}}>
@@ -129,13 +161,17 @@ const App: React.FC = () => {
               for example to power an air fryer (configurable below).
             </Typography>
 
-            <BatterySelectionForm onDataChange={updateBatteryData} />
+            <BatterySelectionForm
+              onDataChange={updateBatteryData}
+              importedBatteryData={batteryData}
+            />
 
             <Divider sx={{my: 2}} />
 
             <BatteryConfigurationForm
               batteryData={batteryData}
               onConfigChange={updateBatteryConfig}
+              importedConfigData={batteryConfigurationData}
             />
           </Box>
 
@@ -166,7 +202,12 @@ const App: React.FC = () => {
               </Button>
               <Button variant="contained" component="label">
                 Import Data (JSON)
-                <input type="file" hidden accept=".json" onChange={() => {}} />
+                <input
+                  type="file"
+                  hidden
+                  accept=".json"
+                  onChange={importData}
+                />
               </Button>
             </Box>
             <Box sx={{mt: 2, display: 'flex', gap: 2}}>
