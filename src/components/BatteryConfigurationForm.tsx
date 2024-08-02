@@ -9,13 +9,11 @@ import {BatteryConfigurationData} from '../model/BatteryConfigurationData';
 interface BatteryConfigurationFormProps {
   batteryData: BatteryData;
   onConfigChange: (config: BatteryConfigurationData) => void;
-  importedConfigData?: BatteryConfigurationData;
 }
 
 const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
   batteryData,
   onConfigChange,
-  importedConfigData,
 }) => {
   const [config, setConfig] = useState<BatteryConfigurationData>({
     seriesCount: 1,
@@ -25,12 +23,6 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
     totalWattHours: 0,
   });
   const theme = useTheme();
-
-  useEffect(() => {
-    if (importedConfigData) {
-      setConfig(importedConfigData);
-    }
-  }, [importedConfigData]);
 
   // Calculate totals when config or batteryData changes
   useEffect(() => {

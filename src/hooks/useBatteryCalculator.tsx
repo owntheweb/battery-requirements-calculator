@@ -20,29 +20,29 @@ export interface BatteryMathData {
 }
 
 export function useBatteryCalculator() {
-  const [devices, setDevices] = useState<Device[]>([]);
   const [batteryData, setBatteryData] = useState<BatteryData>({
-    batteryType: '',
-    volts: 0,
-    ampHours: 0,
-    wattHours: 0,
-    chemistry: 0,
+    batteryType: 'Car Battery',
+    volts: 13.5,
+    ampHours: 100,
+    wattHours: 1350,
+    chemistry: 0.5,
   });
+
   const [batteryConfigurationData, setBatteryConfigurationData] =
     useState<BatteryConfigurationData>({
       seriesCount: 1,
       parallelCount: 1,
-      totalVolts: 0,
-      totalAmpHours: 0,
-      totalWattHours: 0,
+      totalVolts: 13.5,
+      totalAmpHours: 100,
+      totalWattHours: 1350,
     });
 
-  const updateDevices = useCallback(
-    (newDevices: Device[], totals: DeviceTotals) => {
-      setDevices(newDevices);
-    },
-    []
-  );
+  const [devices, setDevices] = useState<Device[]>([]);
+
+  const [deviceTotals, setDeviceTotals] = useState<DeviceTotals>({
+    totalMaxWatts: 0,
+    totalEstimatedWatts: 0,
+  });
 
   const updateBatteryData = useCallback((data: BatteryData) => {
     setBatteryData(data);
@@ -55,10 +55,13 @@ export function useBatteryCalculator() {
     []
   );
 
-  const [deviceTotals, setDeviceTotals] = useState<DeviceTotals>({
-    totalMaxWatts: 0,
-    totalEstimatedWatts: 0,
-  });
+  const updateDevices = useCallback(
+    (newDevices: Device[], totals: DeviceTotals) => {
+      setDevices(newDevices);
+      setDeviceTotals(totals);
+    },
+    []
+  );
 
   const batteryMathData = useMemo<BatteryMathData>(() => {
     // Calculate total device amps

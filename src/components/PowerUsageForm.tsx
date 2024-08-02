@@ -27,13 +27,9 @@ interface PowerUsageFormProps {
     devices: Device[],
     totals: {totalMaxWatts: number; totalEstimatedWatts: number}
   ) => void;
-  importedDevices?: Device[];
 }
 
-const PowerUsageForm: React.FC<PowerUsageFormProps> = ({
-  onDataChange,
-  importedDevices,
-}) => {
+const PowerUsageForm: React.FC<PowerUsageFormProps> = ({onDataChange}) => {
   const [devices, setDevices] = useState<Device[]>([
     {
       id: uuidv4(),
@@ -50,12 +46,6 @@ const PowerUsageForm: React.FC<PowerUsageFormProps> = ({
       error: '',
     },
   ]);
-
-  useEffect(() => {
-    if (importedDevices && importedDevices.length > 0) {
-      setDevices(importedDevices);
-    }
-  }, [importedDevices]);
 
   const addDevice = useCallback(() => {
     const lastDevice = devices[devices.length - 1];
@@ -176,10 +166,9 @@ const PowerUsageForm: React.FC<PowerUsageFormProps> = ({
   );
 
   useEffect(() => {
-    const validDevices = devices.filter(isDeviceValid);
-    const totals = calculateTotals(validDevices);
+    console.log(validDevices, totals);
     onDataChange(validDevices, totals);
-  }, [devices, calculateTotals, isDeviceValid, onDataChange]);
+  }, [validDevices, totals, onDataChange]);
 
   const shouldShowError = useCallback(
     (device: Device, field: 'volts' | 'amps' | 'maxWatts'): boolean => {

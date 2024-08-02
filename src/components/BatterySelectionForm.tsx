@@ -13,7 +13,6 @@ import {BatteryData} from '../model/BatteryData';
 
 interface BatterySelectionFormProps {
   onDataChange: (data: BatteryData) => void;
-  importedBatteryData?: BatteryData;
 }
 
 const batteryTypes = [
@@ -56,17 +55,10 @@ const presetBatteryData: {[key: string]: BatteryData} = {
 
 const BatterySelectionForm: React.FC<BatterySelectionFormProps> = ({
   onDataChange,
-  importedBatteryData,
 }) => {
   const [batteryData, setBatteryData] = useState<BatteryData>(
     presetBatteryData['Car Battery']
   );
-
-  useEffect(() => {
-    if (importedBatteryData) {
-      setBatteryData(importedBatteryData);
-    }
-  }, [importedBatteryData]);
 
   const handleChange = useCallback(
     (field: keyof BatteryData, value: string | number) => {
