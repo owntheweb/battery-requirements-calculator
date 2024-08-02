@@ -80,41 +80,49 @@ const BatteryDemoFeature: React.FC = () => {
           position: 'relative',
         }}
       >
-        {/*<img
-          src="van640x379.png"
-          srcSet="
-              van640x379.png 640w,
-              van1024x607.png 1024w,
-              van1440x853.png 1440w,
-              van1920x1136.png 1920w
-            "
-          sizes="(max-width: 640px) 640px,
-                   (max-width: 1024px) 1024px,
-                   (max-width: 1440px) 1440px,
-                   1920px"
-          alt="Van interior"
-          style={{
+        <Box
+          sx={{
+            position: 'absolute',
             width: '100%',
             height: '100%',
-            objectFit: 'cover',
-            position: 'absolute',
-            top: 0,
-            left: 0,
+            overflow: 'hidden',
           }}
-        />*/}
+        >
+          <img
+            src={process.env.PUBLIC_URL + '/images/vanBackground1920.webp'}
+            srcSet={`
+              ${process.env.PUBLIC_URL}/images/vanBackground768.webp 768w,
+              ${process.env.PUBLIC_URL}/images/vanBackground1000.webp 1000w,
+              ${process.env.PUBLIC_URL}/images/vanBackground1920.webp 1920w
+            `}
+            sizes="(max-width: 768px) 768px,
+                   (max-width: 1000px) 1000px,
+                   1920px"
+            alt="Van Background"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+              objectPosition: 'center',
+            }}
+          />
+        </Box>
         <Box
           sx={{
             width: `${scaledDimensions.width}px`,
             height: `${scaledDimensions.height}px`,
             display: 'flex',
+            flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
             position: 'relative',
-            backgroundColor: '#3A2350',
+            zIndex: 1,
           }}
         >
-          {/* Add your battery demo content here */}
-          <Typography variant="h4">
+          <Typography
+            variant="h4"
+            sx={{color: 'white', textShadow: '2px 2px 4px rgba(0,0,0,0.5)'}}
+          >
             Battery Demo Feature {Math.floor(scaledDimensions.width)}x
             {Math.floor(scaledDimensions.height)}
           </Typography>
@@ -130,7 +138,9 @@ const BatteryDemoFeature: React.FC = () => {
               left: '50%',
               transform: 'translateX(-50%)',
             }}
-          />
+          >
+            TEMP Scroll Down
+          </Button>
         </Box>
       </Box>
     </Box>
