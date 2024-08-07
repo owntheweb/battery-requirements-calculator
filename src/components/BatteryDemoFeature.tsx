@@ -1,6 +1,7 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect, useRef, Fragment} from 'react';
 import {Box, Button, ButtonBase, styled, Typography} from '@mui/material';
 import ScrollArrow from './ScrollArrow';
+import ConnectionLines from './ConnectionLines';
 
 interface ScaledDimensions {
   width: number;
@@ -30,7 +31,16 @@ const BatteryDemoFeature: React.FC = () => {
     height: 0,
   });
   const [debug, setDebug] = useState(false);
+  const [enabledDevices, setEnabledDevices] = useState<string[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const toggleDevice = (deviceName: string) => {
+    setEnabledDevices((prev) =>
+      prev.includes(deviceName)
+        ? prev.filter((d) => d !== deviceName)
+        : [...prev, deviceName]
+    );
+  };
 
   const [images, setImages] = useState<ImageInfo[]>([
     {
@@ -212,143 +222,44 @@ const BatteryDemoFeature: React.FC = () => {
           />
         </Box>
 
-        <svg
-          width={scaledDimensions.width}
-          height={scaledDimensions.height}
-          style={{position: 'absolute', top: 0, left: 0}}
-          viewBox="0 0 3520 2080"
-        >
-          <g
-            id="junctionToBattery"
-            transform="matrix(1.94949,5.65138e-15,5.65138e-15,1.83247,2051.58,632.188)"
-          >
-            <path
-              d="M80.219,268.282L254.929,268.282"
-              style={{
-                fill: 'none',
-                fillRule: 'nonzero',
-                stroke: 'rgb(102,255,251)',
-                strokeWidth: '11.99px',
-                strokeDasharray: '16.91,16.91',
-              }}
-            />
-          </g>
-          <g
-            id="solarToJunction"
-            transform="matrix(1.83247,0,0,1.83247,2081.41,632.188)"
-          >
-            <path
-              d="M254.929,268.282L254.929,0L376.32,0"
-              style={{
-                fill: 'none',
-                fillRule: 'nonzero',
-                stroke: 'rgb(102,255,251)',
-                strokeWidth: '12.38px',
-                strokeDasharray: 'stroke-dasharray:17.46,17.46',
-              }}
-            />
-          </g>
-          <path
-            id="alternatorToJunction"
-            d="M2548.56,1123.81L2548.56,1446.76L2804.19,1446.76"
-            style={{
-              fill: 'none',
-              fillRule: 'nonzero',
-              stroke: 'rgb(102,255,251)',
-              strokeWidth: '22.68px',
-              strokeDasharray: '32,32',
-            }}
-          />
-          <g
-            id="batteryToLowVolt"
-            transform="matrix(1.43513,0,0,1.83247,835.336,757.888)"
-          >
-            <path
-              d="M0,0L373.396,0L373.396,194.222L429.207,194.222"
-              style={{
-                fill: 'none',
-                fillRule: 'nonzero',
-                stroke: 'rgb(252,177,229)',
-                strokeWidth: '13.78px',
-                strokeDasharray: '19.33,19.33',
-              }}
-            />
-          </g>
-          <path
-            id="batteryToDcAc"
-            d="M1371.21,1113.8L1371.21,1303.35L1267.75,1303.35"
-            style={{
-              fill: 'none',
-              fillRule: 'nonzero',
-              stroke: 'rgb(252,177,229)',
-              strokeWidth: '22.68px',
-              strokeDasharray: '31.82,31.82',
-            }}
-          />
-          <path
-            id="junctionToFan"
-            d="M835.336,757.888L656.191,757.888"
-            style={{
-              fill: 'none',
-              fillRule: 'nonzero',
-              stroke: 'rgb(252,177,229)',
-              strokeWidth: '22.68px',
-              strokeDasharray: '31.82,31.82',
-            }}
-          />
-          <g
-            id="junctionToLight"
-            transform="matrix(0,1.83247,1.83247,0,933.634,660.105)"
-          >
-            <path
-              d="M-53.361,-53.361L53.361,-53.361"
-              style={{
-                fill: 'none',
-                fillRule: 'nonzero',
-                stroke: 'rgb(252,177,229)',
-                strokeWidth: '12.38px',
-                strokeDasharray: '17.46,17.46',
-              }}
-            />
-          </g>
-          <path
-            id="dcAcToGaming"
-            d="M883.45,1320.54L583.006,1320.54"
-            style={{
-              fill: 'none',
-              fillRule: 'nonzero',
-              stroke: 'rgb(252,177,229)',
-              strokeWidth: '22.68px',
-              strokeDasharray: '31.82,31.82',
-            }}
-          />
-          <path
-            id="dcAcToAirFryer"
-            d="M1047.01,1604.98L1047.01,1757.87L876.339,1757.87"
-            style={{
-              fill: 'none',
-              fillRule: 'nonzero',
-              stroke: 'rgb(252,177,229)',
-              strokeWidth: '22.68px',
-              strokeDasharray: '31.82,31.82',
-            }}
-          />
-        </svg>
+        <ConnectionLines
+          enabledDevices={enabledDevices}
+          scaledWidth={scaledDimensions.width}
+          scaledHeight={scaledDimensions.height}
+        />
 
         {images.map((img, index) => (
-          <>
-            <img
-              key={index}
-              src={process.env.PUBLIC_URL + img.src}
-              alt={`Demo item ${index + 1}`}
-              style={{
+          <Fragment key={img.src}>
+            <ButtonBase
+              onClick={() =>
+                toggleDevice(img.src.split('/').pop()?.split('.')[0] || '')
+              }
+              sx={{
                 position: 'absolute',
                 left: img.scaledX,
                 top: img.scaledY,
                 width: img.scaledWidth,
                 height: img.scaledHeight,
+                padding: 0,
+                '&:hover': {
+                  opacity: 0.8,
+                },
               }}
-            />
+            >
+              <img
+                src={process.env.PUBLIC_URL + img.src}
+                alt={img.label}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  opacity: enabledDevices.includes(
+                    img.src.split('/').pop()?.split('.')[0] || ''
+                  )
+                    ? 1
+                    : 0.5,
+                }}
+              />
+            </ButtonBase>
 
             {img.scaledWidth &&
               img.scaledHeight &&
@@ -379,7 +290,7 @@ const BatteryDemoFeature: React.FC = () => {
                   {img.label}
                 </Typography>
               )}
-          </>
+          </Fragment>
         ))}
 
         <Typography
