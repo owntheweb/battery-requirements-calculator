@@ -33,14 +33,66 @@ const BatteryDemoFeature: React.FC = () => {
   });
   const [debug, setDebug] = useState(false);
   const [enabledDevices, setEnabledDevices] = useState<string[]>([]);
+  const [dcDependentDevices, setDcDependentDevices] = useState<string[]>([
+    'airFryer',
+    'gamingSystem',
+  ]);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const toggleDevice = (deviceName: string) => {
-    setEnabledDevices((prev) =>
-      prev.includes(deviceName)
-        ? prev.filter((d) => d !== deviceName)
-        : [...prev, deviceName]
-    );
+    setEnabledDevices((prev) => {
+      const newEnabledDevices = [...prev];
+      const deviceIndex = newEnabledDevices.indexOf(deviceName);
+
+      if (deviceName === 'dcToAcConverter') {
+        // Check if any dependent devices are enabled
+        const anyDependentEnabled = dcDependentDevices.some((device) =>
+          newEnabledDevices.includes(device)
+        );
+        if (anyDependentEnabled) {
+          // Can't disable DC to AC converter if dependent devices are enabled
+          return newEnabledDevices;
+        }
+        // Toggle DC to AC converter
+        if (deviceIndex === -1) {
+          newEnabledDevices.push(deviceName);
+        } else {
+          newEnabledDevices.splice(deviceIndex, 1);
+        }
+      } else if (dcDependentDevices.includes(deviceName)) {
+        if (deviceIndex === -1) {
+          // Enabling a dependent device
+          newEnabledDevices.push(deviceName);
+          if (!newEnabledDevices.includes('dcToAcConverter')) {
+            newEnabledDevices.push('dcToAcConverter');
+          }
+        } else {
+          // Disabling a dependent device
+          newEnabledDevices.splice(deviceIndex, 1);
+          // Check if any other dependent devices are still enabled
+          const otherDependentEnabled = dcDependentDevices.some(
+            (device) =>
+              device !== deviceName && newEnabledDevices.includes(device)
+          );
+          if (!otherDependentEnabled) {
+            const dcConverterIndex =
+              newEnabledDevices.indexOf('dcToAcConverter');
+            if (dcConverterIndex !== -1) {
+              newEnabledDevices.splice(dcConverterIndex, 1);
+            }
+          }
+        }
+      } else {
+        // Toggle other devices normally
+        if (deviceIndex === -1) {
+          newEnabledDevices.push(deviceName);
+        } else {
+          newEnabledDevices.splice(deviceIndex, 1);
+        }
+      }
+
+      return newEnabledDevices;
+    });
   };
 
   const [images, setImages] = useState<ImageInfo[]>([
@@ -232,6 +284,29 @@ const BatteryDemoFeature: React.FC = () => {
           />
         </Box>
 
+        <Typography
+          variant="h2"
+          component="h1"
+          gutterBottom
+          color="primary"
+          sx={{
+            position: 'absolute',
+            left: '0',
+            top: '25px',
+            width: '100%',
+            textAlign: 'center',
+            fontSize: {
+              sm: '1rem',
+              md: '1.5rem',
+              lg: '2rem',
+            },
+          }}
+        >
+          How Do Devices Affect
+          <br />
+          Battery Charge?
+        </Typography>
+
         <ConnectionLines
           enabledDevices={enabledDevices}
           scaledWidth={scaledDimensions.width}
@@ -310,29 +385,6 @@ const BatteryDemoFeature: React.FC = () => {
               )}
           </Fragment>
         ))}
-
-        <Typography
-          variant="h2"
-          component="h1"
-          gutterBottom
-          color="primary"
-          sx={{
-            position: 'absolute',
-            left: '0',
-            top: '25px',
-            width: '100%',
-            textAlign: 'center',
-            fontSize: {
-              sm: '1rem',
-              md: '1.5rem',
-              lg: '2rem',
-            },
-          }}
-        >
-          How Do Devices Affect
-          <br />
-          Battery Charge?
-        </Typography>
 
         {debug && (
           <Box
