@@ -34,7 +34,7 @@ const lineConfigs: LineConfig[] = [
   },
   {
     id: 'batteryToLowVolt',
-    path: 'M0,0L373.396,0L373.396,194.222L429.207,194.222',
+    path: 'M0,0l373.396,0l0,194.222',
     strokeWidth: '13.78px',
     strokeDasharray: '19.33,19.33',
   },
@@ -68,15 +68,21 @@ const lineConfigs: LineConfig[] = [
     strokeWidth: '22.68px',
     strokeDasharray: '31.82,31.82',
   },
+  {
+    id: 'batteryOutput',
+    path: 'M373.396,194.222l55.811,0',
+    strokeWidth: '13.78px',
+    strokeDasharray: '19.33,19.33',
+  },
 ];
 
 const deviceLineMap: {[key: string]: string[]} = {
-  airFryer: ['batteryToDcAc', 'dcAcToAirFryer'],
+  airFryer: ['batteryOutput', 'batteryToDcAc', 'dcAcToAirFryer'],
   alternator: ['junctionToBattery', 'alternatorToJunction'],
-  dcToAcConverter: ['batteryToDcAc'],
-  fan: ['batteryToLowVolt', 'junctionToFan'],
-  gamingSystem: ['batteryToDcAc', 'dcAcToGaming'],
-  ledLight: ['batteryToLowVolt', 'junctionToLight'],
+  dcToAcConverter: ['batteryOutput', 'batteryToDcAc'],
+  fan: ['batteryOutput', 'batteryToLowVolt', 'junctionToFan'],
+  gamingSystem: ['batteryOutput', 'batteryToDcAc', 'dcAcToGaming'],
+  ledLight: ['batteryOutput', 'batteryToLowVolt', 'junctionToLight'],
   solarPanel: ['junctionToBattery', 'solarToJunction'],
 };
 
@@ -85,7 +91,8 @@ const reversedLines = new Set([
   'solarToJunction',
   'alternatorToJunction',
   'batteryToLowVolt',
-  'junctionTo',
+  'junctionToLight',
+  'batteryOutput',
 ]);
 
 const ConnectionLines: React.FC<ConnectionLinesProps> = ({
@@ -257,6 +264,21 @@ const ConnectionLines: React.FC<ConnectionLinesProps> = ({
           strokeDasharray: lineConfigs[8].strokeDasharray,
         }}
       />
+      <g
+        id="batteryOutput"
+        transform="matrix(1.43513,0,0,1.83247,835.336,757.888)"
+      >
+        <path
+          d={lineConfigs[9].path}
+          style={{
+            fill: 'none',
+            fillRule: 'nonzero',
+            stroke: 'rgb(252,177,229)',
+            strokeWidth: lineConfigs[9].strokeWidth,
+            strokeDasharray: lineConfigs[9].strokeDasharray,
+          }}
+        />
+      </g>
     </svg>
   );
 };

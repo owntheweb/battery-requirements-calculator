@@ -2,6 +2,7 @@ import React, {useState, useEffect, useRef, Fragment} from 'react';
 import {Box, Button, ButtonBase, styled, Typography} from '@mui/material';
 import ScrollArrow from './ScrollArrow';
 import ConnectionLines from './ConnectionLines';
+import BatteryComponent from './DemoBattery';
 
 interface ScaledDimensions {
   width: number;
@@ -59,15 +60,6 @@ const BatteryDemoFeature: React.FC = () => {
       height: 156,
       label: 'Alternator +150 W',
     },
-    // TODO: This needs to be moved out to its own component
-    {
-      src: '/images/battery.png',
-      x: 551,
-      y: 363,
-      width: 271,
-      height: 110,
-      label: '10 Wh Battery (100.00%)',
-    },
     {
       src: '/images/dcToAcConverter.png',
       x: 342,
@@ -110,6 +102,15 @@ const BatteryDemoFeature: React.FC = () => {
     },
   ]);
 
+  const [batteryInfo, setBatteryInfo] = useState<ImageInfo>({
+    src: '/images/battery.png',
+    x: 551,
+    y: 363,
+    width: 271,
+    height: 110,
+    label: '10 Wh Battery (100.00%)',
+  });
+
   const updateDimensions = () => {
     if (containerRef.current) {
       const containerWidth = Math.min(
@@ -147,6 +148,15 @@ const BatteryDemoFeature: React.FC = () => {
           };
         })
       );
+
+      // Update battery position and size
+      setBatteryInfo((prevBatteryInfo) => ({
+        ...prevBatteryInfo,
+        scaledX: (prevBatteryInfo.x / originalWidth) * scaledWidth,
+        scaledY: (prevBatteryInfo.y / originalHeight) * scaledHeight,
+        scaledWidth: (prevBatteryInfo.width / originalWidth) * scaledWidth,
+        scaledHeight: (prevBatteryInfo.height / originalHeight) * scaledHeight,
+      }));
     }
   };
 
@@ -226,6 +236,14 @@ const BatteryDemoFeature: React.FC = () => {
           enabledDevices={enabledDevices}
           scaledWidth={scaledDimensions.width}
           scaledHeight={scaledDimensions.height}
+        />
+
+        <BatteryComponent
+          scaledX={batteryInfo.scaledX}
+          scaledY={batteryInfo.scaledY}
+          scaledWidth={batteryInfo.scaledWidth}
+          scaledHeight={batteryInfo.scaledHeight}
+          label={batteryInfo.label!}
         />
 
         {images.map((img, index) => (
