@@ -1,8 +1,8 @@
-import React, {useState, useEffect, useRef, Fragment} from 'react';
+import React, {useState, useEffect, useRef, Fragment, useCallback} from 'react';
 import {Box, Button, ButtonBase, styled, Typography} from '@mui/material';
 import ScrollArrow from './ScrollArrow';
 import ConnectionLines from './ConnectionLines';
-import BatteryComponent from './DemoBattery';
+import BatteryComponent, {ChargeState} from './DemoBattery';
 
 interface ScaledDimensions {
   width: number;
@@ -24,6 +24,10 @@ interface ImageInfo {
   label?: string;
 }
 
+interface DevicePower {
+  [key: string]: number;
+}
+
 const BatteryDemoFeature: React.FC = () => {
   const topNavHeight = 64;
   const originalWidth = 1320;
@@ -38,6 +42,14 @@ const BatteryDemoFeature: React.FC = () => {
   const [debug, setDebug] = useState(false);
   const [enabledDevices, setEnabledDevices] = useState<string[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const [batteryCharge, setBatteryCharge] = useState(100);
+  const [chargeState, setChargeState] = useState(ChargeState.FULL);
+  const [dcToAcLabel, setDcToAcLabel] = useState('DC to AC -0 W (90% eff.)');
+
+  const batteryCapacity = 5; // Wh
+  const dcToAcEfficiency = 0.9; // % efficiency
+  const updateInterval = 50; // ms
 
   const toggleDevice = (deviceName: string) => {
     setEnabledDevices((prev) => {
@@ -119,7 +131,7 @@ const BatteryDemoFeature: React.FC = () => {
       y: 437,
       width: 132,
       height: 122,
-      label: 'DC to AC -X W',
+      label: dcToAcLabel,
     },
     {
       src: '/images/fan.png',
@@ -156,12 +168,12 @@ const BatteryDemoFeature: React.FC = () => {
   ]);
 
   const [batteryInfo, setBatteryInfo] = useState<ImageInfo>({
-    src: '/images/battery.png',
+    src: '/images/batteryHasCharge.png',
     x: 551,
     y: 363,
     width: 271,
     height: 110,
-    label: '10 Wh Battery (100.00%)',
+    label: '5 Wh Battery',
   });
 
   const updateDimensions = () => {
@@ -244,6 +256,92 @@ const BatteryDemoFeature: React.FC = () => {
       behavior: 'smooth',
     });
   };
+
+  const calculateDcToAcPower = useCallback(
+    (enabledDevices: string[], devicePower: DevicePower) => {
+      const acDevices = ['airFryer', 'gamingSystem'];
+      const connectedACDevices = enabledDevices.filter((d) =>
+        acDevices.includes(d)
+      );
+      if (connectedACDevices.length > 0) {
+        const acPowerConsumption = connectedACDevices.reduce(
+          (sum, d) => sum + Math.abs(devicePower[d]),
+          0
+        );
+        return acPowerConsumption * (1 - dcToAcEfficiency);
+      }
+      return 0;
+    },
+    [dcToAcEfficiency]
+  );
+
+  useEffect(() => {
+    const devicePower: DevicePower = {
+      airFryer: -1500,
+      alternator: 150,
+      fan: -25,
+      gamingSystem: -250,
+      ledLight: -5,
+      solarPanel: 200,
+      dcToAcConverter: 0, // Base power consumption
+    };
+
+    const interval = setInterval(() => {
+      const dcToAcPower = calculateDcToAcPower(enabledDevices, devicePower);
+      const newDcToAcLabel = `DC to AC -${Math.round(
+        dcToAcPower
+      )} W (90% eff.)`;
+      setDcToAcLabel(newDcToAcLabel);
+
+      // update label in array
+      setImages((prevImages) =>
+        prevImages.map((img) =>
+          img.src.includes('dcToAcConverter')
+            ? {...img, label: newDcToAcLabel}
+            : img
+        )
+      );
+
+      setBatteryCharge((prevCharge) => {
+        let totalPowerChange = 0;
+
+        enabledDevices.forEach((device) => {
+          let devicePowerConsumption = devicePower[device] || 0;
+
+          // Special handling for DC to AC converter
+          if (device === 'dcToAcConverter') {
+            devicePowerConsumption = -dcToAcPower;
+          }
+
+          totalPowerChange += devicePowerConsumption;
+        });
+
+        // Convert power change from watts to watt-hours for the update interval
+        const energyChange =
+          (totalPowerChange / 3600) * (updateInterval / 1000); // Wh per interval
+        const newChargeWh = (prevCharge / 100) * batteryCapacity + energyChange;
+        const newChargePercentage = (newChargeWh / batteryCapacity) * 100;
+
+        // Clamp the new charge between 0 and 100
+        const clampedCharge = Math.max(0, Math.min(100, newChargePercentage));
+
+        // Update charge state
+        if (clampedCharge > prevCharge) {
+          setChargeState(ChargeState.CHARGING);
+        } else if (clampedCharge < prevCharge) {
+          setChargeState(ChargeState.DEPLETING);
+        } else if (clampedCharge === 100) {
+          setChargeState(ChargeState.FULL);
+        } else if (clampedCharge === 0) {
+          setChargeState(ChargeState.EMPTY);
+        }
+
+        return clampedCharge;
+      });
+    }, updateInterval);
+
+    return () => clearInterval(interval);
+  }, [enabledDevices]);
 
   return (
     <Box
@@ -330,6 +428,8 @@ const BatteryDemoFeature: React.FC = () => {
           scaledHeight={batteryInfo.scaledHeight}
           label={batteryInfo.label!}
           fontScaleFactor={scaledDimensions.fontScaleFactor}
+          chargeState={chargeState}
+          chargeAmount={batteryCharge}
         />
 
         {images.map((img, index) => (

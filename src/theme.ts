@@ -53,11 +53,6 @@ const theme = createTheme({
     },
   },
   components: {
-    MuiCssBaseline: {
-      styleOverrides: `
-        @import url('https://fonts.googleapis.com/css2?family=Kode+Mono:wght@400..700&display=swap');
-      `,
-    },
     MuiTooltip: {
       styleOverrides: {
         tooltip: {
