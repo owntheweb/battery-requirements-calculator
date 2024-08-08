@@ -11,6 +11,7 @@ interface ConnectionLinesProps {
   enabledDevices: string[];
   scaledWidth: number;
   scaledHeight: number;
+  offsetX: number;
 }
 
 const lineConfigs: LineConfig[] = [
@@ -99,6 +100,7 @@ const ConnectionLines: React.FC<ConnectionLinesProps> = ({
   enabledDevices,
   scaledWidth,
   scaledHeight,
+  offsetX,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
 
@@ -146,7 +148,7 @@ const ConnectionLines: React.FC<ConnectionLinesProps> = ({
       ref={svgRef}
       width={scaledWidth}
       height={scaledHeight}
-      style={{position: 'absolute', top: 0, left: 0}}
+      style={{position: 'absolute', top: 0, left: offsetX}}
       viewBox="0 0 3520 2080"
     >
       <g

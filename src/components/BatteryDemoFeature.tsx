@@ -7,6 +7,8 @@ import BatteryComponent from './DemoBattery';
 interface ScaledDimensions {
   width: number;
   height: number;
+  fontScaleFactor: number;
+  offsetX: number;
 }
 
 interface ImageInfo {
@@ -30,13 +32,11 @@ const BatteryDemoFeature: React.FC = () => {
   const [scaledDimensions, setScaledDimensions] = useState<ScaledDimensions>({
     width: 0,
     height: 0,
+    fontScaleFactor: 1,
+    offsetX: 0,
   });
   const [debug, setDebug] = useState(false);
   const [enabledDevices, setEnabledDevices] = useState<string[]>([]);
-  const [dcDependentDevices, setDcDependentDevices] = useState<string[]>([
-    'airFryer',
-    'gamingSystem',
-  ]);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const toggleDevice = (deviceName: string) => {
@@ -95,6 +95,7 @@ const BatteryDemoFeature: React.FC = () => {
     });
   };
 
+  const dcDependentDevices = ['airFryer', 'gamingSystem'];
   const [images, setImages] = useState<ImageInfo[]>([
     {
       src: '/images/airFryer.png',
@@ -186,15 +187,28 @@ const BatteryDemoFeature: React.FC = () => {
         scaledHeight = scaledWidth / targetAspectRatio;
       }
 
-      setScaledDimensions({width: scaledWidth, height: scaledHeight});
+      // Calculate font scale factor based on height
+      const fontScaleFactor = (scaledHeight / originalHeight) * 1.1;
+
+      // Calculate the offset to center the content
+      const offsetX = (containerWidth - scaledWidth) / 2;
+
+      setScaledDimensions({
+        width: scaledWidth,
+        height: scaledHeight,
+        fontScaleFactor,
+        offsetX,
+      });
 
       // Update image positions and sizes
       setImages((prevImages) =>
         prevImages.map((img) => {
+          const scaledX = (img.x / originalWidth) * scaledWidth;
+          const scaledY = (img.y / originalHeight) * scaledHeight;
           return {
             ...img,
-            scaledX: (img.x / originalWidth) * scaledWidth,
-            scaledY: (img.y / originalHeight) * scaledHeight,
+            scaledX: scaledX + offsetX,
+            scaledY: scaledY,
             scaledWidth: (img.width / originalWidth) * scaledWidth,
             scaledHeight: (img.height / originalHeight) * scaledHeight,
           };
@@ -202,13 +216,18 @@ const BatteryDemoFeature: React.FC = () => {
       );
 
       // Update battery position and size
-      setBatteryInfo((prevBatteryInfo) => ({
-        ...prevBatteryInfo,
-        scaledX: (prevBatteryInfo.x / originalWidth) * scaledWidth,
-        scaledY: (prevBatteryInfo.y / originalHeight) * scaledHeight,
-        scaledWidth: (prevBatteryInfo.width / originalWidth) * scaledWidth,
-        scaledHeight: (prevBatteryInfo.height / originalHeight) * scaledHeight,
-      }));
+      setBatteryInfo((prevBatteryInfo) => {
+        const scaledX = (prevBatteryInfo.x / originalWidth) * scaledWidth;
+        const scaledY = (prevBatteryInfo.y / originalHeight) * scaledHeight;
+        return {
+          ...prevBatteryInfo,
+          scaledX: scaledX + offsetX,
+          scaledY: scaledY,
+          scaledWidth: (prevBatteryInfo.width / originalWidth) * scaledWidth,
+          scaledHeight:
+            (prevBatteryInfo.height / originalHeight) * scaledHeight,
+        };
+      });
     }
   };
 
@@ -228,31 +247,25 @@ const BatteryDemoFeature: React.FC = () => {
 
   return (
     <Box
+      ref={containerRef}
       sx={{
-        width: '100%',
-        maxWidth: `${originalWidth}px`,
-        margin: '0 auto',
-        height: `${scaledDimensions.height}px`,
-        maxHeight: '100vh',
         justifyContent: 'center',
         alignItems: 'center',
         overflow: 'hidden',
         position: 'relative',
-        display: {
-          xs: 'none', // Hide on extra small screens
-          sm: 'flex', // Show on small screens and above
-        },
       }}
     >
       <Box
-        ref={containerRef}
         sx={{
           width: '100%',
-          height: '100%',
-          display: 'flex',
+          maxWidth: `${originalWidth}px`,
+          margin: '0 auto',
+          height: `${scaledDimensions.height}px`,
+          maxHeight: '100vh',
           justifyContent: 'center',
           alignItems: 'center',
           position: 'relative',
+          display: scaledDimensions.fontScaleFactor >= 0.5 ? 'flex' : 'none',
         }}
       >
         <Box
@@ -295,11 +308,7 @@ const BatteryDemoFeature: React.FC = () => {
             top: '25px',
             width: '100%',
             textAlign: 'center',
-            fontSize: {
-              sm: '1rem',
-              md: '1.5rem',
-              lg: '2rem',
-            },
+            fontSize: `${1.5 * scaledDimensions.fontScaleFactor}rem`,
           }}
         >
           How Do Devices Affect
@@ -311,6 +320,7 @@ const BatteryDemoFeature: React.FC = () => {
           enabledDevices={enabledDevices}
           scaledWidth={scaledDimensions.width}
           scaledHeight={scaledDimensions.height}
+          offsetX={scaledDimensions.offsetX}
         />
 
         <BatteryComponent
@@ -319,6 +329,7 @@ const BatteryDemoFeature: React.FC = () => {
           scaledWidth={batteryInfo.scaledWidth}
           scaledHeight={batteryInfo.scaledHeight}
           label={batteryInfo.label!}
+          fontScaleFactor={scaledDimensions.fontScaleFactor}
         />
 
         {images.map((img, index) => (
@@ -364,17 +375,14 @@ const BatteryDemoFeature: React.FC = () => {
                   sx={{
                     position: 'absolute',
                     left: `${img.scaledX + img.scaledWidth * 0.5 - 150}px`,
-                    top: {
-                      sm: `${img.scaledY + img.scaledHeight + 5}px`,
-                      md: `${img.scaledY + img.scaledHeight + 10}px`,
-                    },
                     width: '300px',
                     textAlign: 'center',
-                    fontSize: {
-                      sm: '0.6rem',
-                      md: '0.9rem',
-                      lg: '1.1rem',
-                    },
+                    fontSize: `${scaledDimensions.fontScaleFactor}rem`,
+                    top: `${
+                      img.scaledY +
+                      img.scaledHeight +
+                      10 * scaledDimensions.fontScaleFactor
+                    }px`,
                     fontFamily: '"Kode Mono", monospace',
                     textShadow:
                       '-2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000',
@@ -407,7 +415,10 @@ const BatteryDemoFeature: React.FC = () => {
             </Typography>
           </Box>
         )}
-        <ScrollArrow onClick={handleScrollDown} />
+        <ScrollArrow
+          onClick={handleScrollDown}
+          scaleFactor={scaledDimensions.fontScaleFactor}
+        />
       </Box>
     </Box>
   );

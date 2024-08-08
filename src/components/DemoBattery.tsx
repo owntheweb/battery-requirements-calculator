@@ -7,6 +7,7 @@ interface BatteryComponentProps {
   scaledWidth?: number;
   scaledHeight?: number;
   label: string;
+  fontScaleFactor: number;
 }
 
 const BatteryComponent: React.FC<BatteryComponentProps> = ({
@@ -15,6 +16,7 @@ const BatteryComponent: React.FC<BatteryComponentProps> = ({
   scaledWidth,
   scaledHeight,
   label,
+  fontScaleFactor,
 }) => {
   return (
     <>
@@ -43,17 +45,10 @@ const BatteryComponent: React.FC<BatteryComponentProps> = ({
           sx={{
             position: 'absolute',
             left: `${scaledX + scaledWidth * 0.5 - 150}px`,
-            top: {
-              sm: `${scaledY + scaledHeight + 5}px`,
-              md: `${scaledY + scaledHeight + 10}px`,
-            },
+            top: `${scaledY + scaledHeight + 10 * fontScaleFactor}px`,
             width: '300px',
             textAlign: 'center',
-            fontSize: {
-              sm: '0.6rem',
-              md: '0.9rem',
-              lg: '1.1rem',
-            },
+            fontSize: `${0.9 * fontScaleFactor}rem`,
             fontFamily: '"Kode Mono", monospace',
             textShadow:
               '-2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000',

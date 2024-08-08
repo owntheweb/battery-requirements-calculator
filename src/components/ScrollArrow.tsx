@@ -3,10 +3,19 @@ import {ButtonBase} from '@mui/material';
 
 interface ScrollArrowProps {
   onClick: () => void;
+  scaleFactor: number;
 }
 
-const ScrollArrow: React.FC<ScrollArrowProps> = ({onClick}) => {
+const ScrollArrow: React.FC<ScrollArrowProps> = ({onClick, scaleFactor}) => {
   const [isHovered, setIsHovered] = useState(false);
+
+  // Original dimensions
+  const originalWidth = 44;
+  const originalHeight = 26;
+
+  // Scaled dimensions
+  const scaledWidth = originalWidth * scaleFactor;
+  const scaledHeight = originalHeight * scaleFactor;
 
   return (
     <ButtonBase
@@ -18,8 +27,8 @@ const ScrollArrow: React.FC<ScrollArrowProps> = ({onClick}) => {
         bottom: '5%',
         right: '7%',
         transform: 'translateX(-50%)',
-        width: '44px',
-        height: '26px',
+        width: `${scaledWidth}px`,
+        height: `${scaledHeight}px`,
         padding: 0,
         backgroundColor: 'transparent',
         transition: 'filter 0.3s ease-in-out',
