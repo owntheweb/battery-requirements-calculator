@@ -45,7 +45,7 @@ const BatteryDemoFeature: React.FC = () => {
 
   const [batteryCharge, setBatteryCharge] = useState(100);
   const [chargeState, setChargeState] = useState(ChargeState.FULL);
-  const [dcToAcLabel, setDcToAcLabel] = useState('DC to AC -0 W (90% eff.)');
+  const [dcToAcLabel, setDcToAcLabel] = useState('DC->AC 0W (90% eff.)');
 
   const batteryCapacity = 5; // Wh
   const dcToAcEfficiency = 0.9; // % efficiency
@@ -115,7 +115,7 @@ const BatteryDemoFeature: React.FC = () => {
       y: 594,
       width: 112,
       height: 136,
-      label: 'Air Fryer -1500 W',
+      label: 'Air Fryer -1500W',
     },
     {
       src: '/images/alternator.png',
@@ -123,7 +123,7 @@ const BatteryDemoFeature: React.FC = () => {
       y: 455,
       width: 153,
       height: 156,
-      label: 'Alternator +150 W',
+      label: 'Alternator +150W',
     },
     {
       src: '/images/dcToAcConverter.png',
@@ -139,7 +139,7 @@ const BatteryDemoFeature: React.FC = () => {
       y: 212,
       width: 129,
       height: 131,
-      label: 'Vent Fans -25 W',
+      label: 'Vent Fans -25W',
     },
     {
       src: '/images/gamingSystem.png',
@@ -147,7 +147,7 @@ const BatteryDemoFeature: React.FC = () => {
       y: 406,
       width: 134,
       height: 132,
-      label: 'High End Gaming -250 W',
+      label: 'High End Gaming -250W',
     },
     {
       src: '/images/ledLight.png',
@@ -155,7 +155,7 @@ const BatteryDemoFeature: React.FC = () => {
       y: 21,
       width: 130,
       height: 139,
-      label: 'LED Lights -5 W',
+      label: 'LED Lights -5W',
     },
     {
       src: '/images/solarPanel.png',
@@ -163,7 +163,7 @@ const BatteryDemoFeature: React.FC = () => {
       y: 153,
       width: 176,
       height: 125,
-      label: 'Solar Panel +200 W',
+      label: 'Solar Panel +200W',
     },
   ]);
 
@@ -173,7 +173,7 @@ const BatteryDemoFeature: React.FC = () => {
     y: 363,
     width: 271,
     height: 110,
-    label: '5 Wh Battery',
+    label: '5Wh Battery',
   });
 
   const updateDimensions = () => {
@@ -288,9 +288,9 @@ const BatteryDemoFeature: React.FC = () => {
 
     const interval = setInterval(() => {
       const dcToAcPower = calculateDcToAcPower(enabledDevices, devicePower);
-      const newDcToAcLabel = `DC to AC -${Math.round(
+      const newDcToAcLabel = `DC->AC ${dcToAcPower > 0 ? '-' : ''}${Math.round(
         dcToAcPower
-      )} W (90% eff.)`;
+      )}W (90% eff.)`;
       setDcToAcLabel(newDcToAcLabel);
 
       // update label in array
