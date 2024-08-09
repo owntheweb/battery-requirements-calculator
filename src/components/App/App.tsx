@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useCallback, useRef} from 'react';
 import {Box, Container, Typography, Divider, Button} from '@mui/material';
 import {ThemeProvider} from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -14,6 +14,9 @@ import BatterySelectionForm from '../BatterySelectionForm';
 import BatteryConfigurationForm from '../BatteryConfigurationForm';
 import BatteryMath from '../BatteryMath';
 import {useBatteryCalculator} from '../../hooks/useBatteryCalculator';
+import {Device} from '../../model/Device';
+import {BatteryData} from '../../model/BatteryData';
+import {BatteryConfigurationData} from '../../model/BatteryConfigurationData';
 
 const App: React.FC = () => {
   const {
@@ -26,6 +29,17 @@ const App: React.FC = () => {
     updateBatteryConfig,
     updateDevices,
   } = useBatteryCalculator();
+
+  const [importedDataFlag, setImportedDataFlag] = useState(false);
+  const importedDataRef = useRef<{
+    devices: Device[] | null;
+    batteryData: BatteryData | null;
+    batteryConfigurationData: BatteryConfigurationData | null;
+  }>({
+    devices: null,
+    batteryData: null,
+    batteryConfigurationData: null,
+  });
 
   // Export data as JSON
   const exportData = () => {
@@ -92,6 +106,45 @@ const App: React.FC = () => {
     saveAs(blob, 'battery_math.csv');
   };
 
+  const importData = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const importedData = JSON.parse(e.target?.result as string);
+            if (importedData.version === '1.0') {
+              importedDataRef.current = {
+                devices: importedData.devices,
+                batteryData: importedData.batteryData,
+                batteryConfigurationData: importedData.batteryConfigurationData,
+              };
+
+              // Update the main state
+              updateDevices(importedData.devices, {
+                totalMaxWatts: importedData.batteryMathData.totalMaxWatts,
+                totalEstimatedWatts:
+                  importedData.batteryMathData.totalEstimatedWatts,
+              });
+              updateBatteryData(importedData.batteryData);
+              updateBatteryConfig(importedData.batteryConfigurationData);
+
+              // Set the flag to trigger a re-render
+              setImportedDataFlag(true);
+            } else {
+              console.error('Unsupported file version');
+            }
+          } catch (error) {
+            console.error('Error parsing imported data:', error);
+          }
+        };
+        reader.readAsText(file);
+      }
+    },
+    [updateDevices, updateBatteryData, updateBatteryConfig]
+  );
+
   return (
     <ThemeProvider theme={theme}>
       <Box sx={{minHeight: '100vh', flexGrow: 1}}>
@@ -114,7 +167,11 @@ const App: React.FC = () => {
               power they will use.
             </Typography>
 
-            <PowerUsageForm onDataChange={updateDevices} />
+            <PowerUsageForm
+              onDataChange={updateDevices}
+              importedDevices={importedDataRef.current.devices || devices}
+              importTrigger={importedDataFlag}
+            />
           </Box>
 
           <Box sx={{p: 3}}>
@@ -129,13 +186,24 @@ const App: React.FC = () => {
               for example to power an air fryer (configurable below).
             </Typography>
 
-            <BatterySelectionForm onDataChange={updateBatteryData} />
+            <BatterySelectionForm
+              onDataChange={updateBatteryData}
+              importedBatteryData={
+                importedDataRef.current.batteryData || batteryData
+              }
+              importTrigger={importedDataFlag}
+            />
 
             <Divider sx={{my: 2}} />
 
             <BatteryConfigurationForm
               batteryData={batteryData}
               onConfigChange={updateBatteryConfig}
+              importedConfigData={
+                importedDataRef.current.batteryConfigurationData ||
+                batteryConfigurationData
+              }
+              importTrigger={importedDataFlag}
             />
           </Box>
 
@@ -166,7 +234,12 @@ const App: React.FC = () => {
               </Button>
               <Button variant="contained" component="label">
                 Import Data (JSON)
-                <input type="file" hidden accept=".json" onChange={() => {}} />
+                <input
+                  type="file"
+                  hidden
+                  accept=".json"
+                  onChange={importData}
+                />
               </Button>
             </Box>
             <Box sx={{mt: 2, display: 'flex', gap: 2}}>

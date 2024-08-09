@@ -27,9 +27,15 @@ interface PowerUsageFormProps {
     devices: Device[],
     totals: {totalMaxWatts: number; totalEstimatedWatts: number}
   ) => void;
+  importedDevices: Device[] | null;
+  importTrigger: boolean;
 }
 
-const PowerUsageForm: React.FC<PowerUsageFormProps> = ({onDataChange}) => {
+const PowerUsageForm: React.FC<PowerUsageFormProps> = ({
+  onDataChange,
+  importedDevices,
+  importTrigger,
+}) => {
   const [devices, setDevices] = useState<Device[]>([
     {
       id: uuidv4(),
@@ -46,6 +52,12 @@ const PowerUsageForm: React.FC<PowerUsageFormProps> = ({onDataChange}) => {
       error: '',
     },
   ]);
+
+  useEffect(() => {
+    if (importTrigger && importedDevices) {
+      setDevices(importedDevices);
+    }
+  }, [importTrigger, importedDevices]);
 
   const addDevice = useCallback(() => {
     const lastDevice = devices[devices.length - 1];

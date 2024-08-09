@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useMemo} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {TextField, Grid, Box, useTheme, Typography} from '@mui/material';
 import BatteryFullIcon from '@mui/icons-material/BatteryFull';
 import AddIcon from '@mui/icons-material/Add';
@@ -9,11 +9,15 @@ import {BatteryConfigurationData} from '../model/BatteryConfigurationData';
 interface BatteryConfigurationFormProps {
   batteryData: BatteryData;
   onConfigChange: (config: BatteryConfigurationData) => void;
+  importedConfigData?: BatteryConfigurationData;
+  importTrigger: boolean;
 }
 
 const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
   batteryData,
   onConfigChange,
+  importedConfigData,
+  importTrigger,
 }) => {
   const [config, setConfig] = useState<BatteryConfigurationData>({
     seriesCount: 1,
@@ -24,32 +28,53 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
   });
   const theme = useTheme();
 
-  // Calculate totals when config or batteryData changes
+  const calculateTotals = useCallback(
+    (currentConfig: BatteryConfigurationData): BatteryConfigurationData => {
+      const totalVolts = batteryData.volts * currentConfig.seriesCount;
+      const totalAmpHours = batteryData.ampHours * currentConfig.parallelCount;
+      const totalWattHours = totalVolts * totalAmpHours;
+
+      return {
+        ...currentConfig,
+        totalVolts,
+        totalAmpHours,
+        totalWattHours,
+      };
+    },
+    [batteryData]
+  );
+
+  // Effect to handle imported data
   useEffect(() => {
-    const totalVolts = batteryData.volts * config.seriesCount;
-    const totalAmpHours = batteryData.ampHours * config.parallelCount;
-    const totalWattHours = totalVolts * totalAmpHours;
+    if (importTrigger && importedConfigData) {
+      console.log('Importing config data:', importedConfigData);
+      const newConfig = calculateTotals({
+        seriesCount: importedConfigData.seriesCount,
+        parallelCount: importedConfigData.parallelCount,
+        totalVolts: 0,
+        totalAmpHours: 0,
+        totalWattHours: 0,
+      });
+      setConfig(newConfig);
+      onConfigChange(newConfig);
+    }
+  }, [importTrigger, importedConfigData, calculateTotals, onConfigChange]);
 
-    const newConfig = {
-      ...config,
-      totalVolts,
-      totalAmpHours,
-      totalWattHours,
-    };
-
-    setConfig(newConfig);
-    onConfigChange(newConfig);
-  }, [batteryData, config.seriesCount, config.parallelCount, onConfigChange]);
-
-  const handleChange = (
-    field: 'seriesCount' | 'parallelCount',
-    value: number
-  ) => {
-    setConfig((prevConfig) => ({
-      ...prevConfig,
-      [field]: Math.max(1, value),
-    }));
-  };
+  const handleChange = useCallback(
+    (field: 'seriesCount' | 'parallelCount', value: number) => {
+      const newValue = Math.max(1, value);
+      setConfig((prevConfig) => {
+        const updatedConfig = {
+          ...prevConfig,
+          [field]: newValue,
+        };
+        const newConfig = calculateTotals(updatedConfig);
+        onConfigChange(newConfig);
+        return newConfig;
+      });
+    },
+    [calculateTotals, onConfigChange]
+  );
 
   const renderBatteryGrid = () => {
     const cellWidth = 80;
@@ -57,7 +82,7 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
     const batteryWidth = 60;
     const batteryHeight = 60;
     const iconSize = 40;
-    const totalWidth = config.seriesCount * cellWidth + iconSize * 2; // Add space for icons
+    const totalWidth = config.seriesCount * cellWidth + iconSize * 2;
     const totalHeight = config.parallelCount * cellHeight;
 
     return (
@@ -189,6 +214,9 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
             }
             fullWidth
             margin="normal"
+            InputProps={{
+              inputProps: {min: 1},
+            }}
           />
         </Grid>
         <Grid item xs={6}>
@@ -201,6 +229,9 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
             }
             fullWidth
             margin="normal"
+            InputProps={{
+              inputProps: {min: 1},
+            }}
           />
         </Grid>
       </Grid>
