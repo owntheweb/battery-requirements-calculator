@@ -1,5 +1,20 @@
 import {createTheme} from '@mui/material/styles';
 
+declare module '@mui/material/styles' {
+  interface Palette {
+    connection: {
+      charging: string;
+      discharging: string;
+    };
+  }
+  interface PaletteOptions {
+    connection?: {
+      charging?: string;
+      discharging?: string;
+    };
+  }
+}
+
 const theme = createTheme({
   palette: {
     mode: 'dark',
@@ -24,32 +39,36 @@ const theme = createTheme({
     success: {
       main: '#95E1D3',
     },
+    connection: {
+      charging: 'rgb(102,255,251)',
+      discharging: 'rgb(252,177,229)',
+    },
   },
   typography: {
     fontFamily: 'Roboto, Arial, sans-serif',
     h1: {
       fontFamily: '"Kode Mono", monospace',
-      fontSize: '2.5rem', // Adjusted from the default (usually around 6rem)
+      fontSize: '2.5rem',
     },
     h2: {
       fontFamily: '"Kode Mono", monospace',
-      fontSize: '1.8rem', // As requested
+      fontSize: '1.8rem',
     },
     h3: {
       fontFamily: '"Kode Mono", monospace',
-      fontSize: '1.5rem', // Adjusted proportionally
+      fontSize: '1.5rem',
     },
     h4: {
       fontFamily: '"Kode Mono", monospace',
-      fontSize: '1.3rem', // Adjusted proportionally
+      fontSize: '1.3rem',
     },
     h5: {
       fontFamily: '"Kode Mono", monospace',
-      fontSize: '1.2rem', // Adjusted proportionally
+      fontSize: '1.2rem',
     },
     h6: {
       fontFamily: '"Kode Mono", monospace',
-      fontSize: '1.1rem', // Adjusted proportionally
+      fontSize: '1.1rem',
     },
   },
   components: {

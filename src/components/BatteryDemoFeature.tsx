@@ -3,6 +3,7 @@ import {Box, Button, ButtonBase, styled, Typography} from '@mui/material';
 import ScrollArrow from './ScrollArrow';
 import ConnectionLines from './ConnectionLines';
 import BatteryComponent, {ChargeState} from './DemoBattery';
+import MobileBatteryDemo from './MobileBatteryDemo';
 
 interface ScaledDimensions {
   width: number;
@@ -110,12 +111,12 @@ const BatteryDemoFeature: React.FC = () => {
   const dcDependentDevices = ['airFryer', 'gamingSystem'];
   const [images, setImages] = useState<ImageInfo[]>([
     {
-      src: '/images/airFryer.png',
-      x: 206,
-      y: 594,
-      width: 112,
-      height: 136,
-      label: 'Air Fryer -1500W',
+      src: '/images/solarPanel.png',
+      x: 1047,
+      y: 153,
+      width: 176,
+      height: 125,
+      label: 'Solar Panel +200W',
     },
     {
       src: '/images/alternator.png',
@@ -126,12 +127,12 @@ const BatteryDemoFeature: React.FC = () => {
       label: 'Alternator +150W',
     },
     {
-      src: '/images/dcToAcConverter.png',
-      x: 342,
-      y: 437,
-      width: 132,
-      height: 122,
-      label: dcToAcLabel,
+      src: '/images/ledLight.png',
+      x: 246,
+      y: 21,
+      width: 130,
+      height: 139,
+      label: 'LED Lights -5W',
     },
     {
       src: '/images/fan.png',
@@ -142,6 +143,14 @@ const BatteryDemoFeature: React.FC = () => {
       label: 'Vent Fans -25W',
     },
     {
+      src: '/images/dcToAcConverter.png',
+      x: 342,
+      y: 437,
+      width: 132,
+      height: 122,
+      label: dcToAcLabel,
+    },
+    {
       src: '/images/gamingSystem.png',
       x: 84,
       y: 406,
@@ -150,20 +159,12 @@ const BatteryDemoFeature: React.FC = () => {
       label: 'High End Gaming -250W',
     },
     {
-      src: '/images/ledLight.png',
-      x: 246,
-      y: 21,
-      width: 130,
-      height: 139,
-      label: 'LED Lights -5W',
-    },
-    {
-      src: '/images/solarPanel.png',
-      x: 1047,
-      y: 153,
-      width: 176,
-      height: 125,
-      label: 'Solar Panel +200W',
+      src: '/images/airFryer.png',
+      x: 206,
+      y: 594,
+      width: 112,
+      height: 136,
+      label: 'Air Fryer -1500W',
     },
   ]);
 
@@ -341,7 +342,7 @@ const BatteryDemoFeature: React.FC = () => {
     }, updateInterval);
 
     return () => clearInterval(interval);
-  }, [enabledDevices]);
+  }, [calculateDcToAcPower, enabledDevices]);
 
   return (
     <Box
@@ -353,173 +354,184 @@ const BatteryDemoFeature: React.FC = () => {
         position: 'relative',
       }}
     >
-      <Box
-        sx={{
-          width: '100%',
-          maxWidth: `${originalWidth}px`,
-          margin: '0 auto',
-          height: `${scaledDimensions.height}px`,
-          maxHeight: '100vh',
-          justifyContent: 'center',
-          alignItems: 'center',
-          position: 'relative',
-          display: scaledDimensions.fontScaleFactor >= 0.5 ? 'flex' : 'none',
-        }}
-      >
+      {scaledDimensions.fontScaleFactor >= 0.5 ? (
         <Box
           sx={{
-            position: 'absolute',
             width: '100%',
-            height: '100%',
-            overflow: 'hidden',
-            paddingBottom: '85px',
+            maxWidth: `${originalWidth}px`,
+            margin: '0 auto',
+            height: `${scaledDimensions.height}px`,
+            maxHeight: '100vh',
+            justifyContent: 'center',
+            alignItems: 'center',
+            position: 'relative',
+            display: 'flex',
           }}
         >
-          <img
-            src={process.env.PUBLIC_URL + '/images/vanBackground1920.webp'}
-            srcSet={`
+          <Box
+            sx={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              overflow: 'hidden',
+              paddingBottom: '85px',
+            }}
+          >
+            <img
+              src={process.env.PUBLIC_URL + '/images/vanBackground1920.webp'}
+              srcSet={`
               ${process.env.PUBLIC_URL}/images/vanBackground768.webp 768w,
               ${process.env.PUBLIC_URL}/images/vanBackground1000.webp 1000w,
               ${process.env.PUBLIC_URL}/images/vanBackground1920.webp 1920w
             `}
-            sizes="(max-width: 768px) 768px,
+              sizes="(max-width: 768px) 768px,
                    (max-width: 1000px) 1000px,
                    1920px"
-            alt="Van Background"
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain',
-              objectPosition: 'center',
-            }}
-          />
-        </Box>
-
-        <Typography
-          variant="h2"
-          component="h1"
-          gutterBottom
-          color="primary"
-          sx={{
-            position: 'absolute',
-            left: '0',
-            top: '25px',
-            width: '100%',
-            textAlign: 'center',
-            fontSize: `${1.5 * scaledDimensions.fontScaleFactor}rem`,
-          }}
-        >
-          How Do Devices Affect
-          <br />
-          Battery Charge?
-        </Typography>
-
-        <ConnectionLines
-          enabledDevices={enabledDevices}
-          scaledWidth={scaledDimensions.width}
-          scaledHeight={scaledDimensions.height}
-          offsetX={scaledDimensions.offsetX}
-        />
-
-        <BatteryComponent
-          scaledX={batteryInfo.scaledX}
-          scaledY={batteryInfo.scaledY}
-          scaledWidth={batteryInfo.scaledWidth}
-          scaledHeight={batteryInfo.scaledHeight}
-          label={batteryInfo.label!}
-          fontScaleFactor={scaledDimensions.fontScaleFactor}
-          chargeState={chargeState}
-          chargeAmount={batteryCharge}
-        />
-
-        {images.map((img, index) => (
-          <Fragment key={img.src}>
-            <ButtonBase
-              onClick={() =>
-                toggleDevice(img.src.split('/').pop()?.split('.')[0] || '')
-              }
-              sx={{
-                position: 'absolute',
-                left: img.scaledX,
-                top: img.scaledY,
-                width: img.scaledWidth,
-                height: img.scaledHeight,
-                padding: 0,
-                '&:hover': {
-                  opacity: 0.8,
-                },
+              alt="Van Background"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                objectPosition: 'center',
               }}
-            >
-              <img
-                src={process.env.PUBLIC_URL + img.src}
-                alt={img.label}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  opacity: enabledDevices.includes(
-                    img.src.split('/').pop()?.split('.')[0] || ''
-                  )
-                    ? 1
-                    : 0.5,
-                }}
-              />
-            </ButtonBase>
+            />
+          </Box>
 
-            {img.scaledWidth &&
-              img.scaledHeight &&
-              img.scaledX &&
-              img.scaledY && (
-                <Typography
-                  variant="body1"
-                  color="white"
-                  sx={{
-                    position: 'absolute',
-                    left: `${img.scaledX + img.scaledWidth * 0.5 - 150}px`,
-                    width: '300px',
-                    textAlign: 'center',
-                    fontSize: `${scaledDimensions.fontScaleFactor}rem`,
-                    top: `${
-                      img.scaledY +
-                      img.scaledHeight +
-                      10 * scaledDimensions.fontScaleFactor
-                    }px`,
-                    fontFamily: '"Kode Mono", monospace',
-                    textShadow:
-                      '-2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000',
-                  }}
-                >
-                  {img.label}
-                </Typography>
-              )}
-          </Fragment>
-        ))}
-
-        {debug && (
-          <Box
+          <Typography
+            variant="h2"
+            component="h1"
+            gutterBottom
+            color="primary"
             sx={{
-              width: `${scaledDimensions.width}px`,
-              height: `${scaledDimensions.height}px`,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              position: 'relative',
+              position: 'absolute',
+              left: '0',
+              top: '25px',
+              width: '100%',
+              textAlign: 'center',
+              fontSize: `${1.5 * scaledDimensions.fontScaleFactor}rem`,
             }}
           >
-            <Typography
-              variant="h4"
-              sx={{color: 'white', textShadow: '2px 2px 4px rgba(0,0,0,0.5)'}}
+            How Do Devices Affect
+            <br />
+            Battery Charge?
+          </Typography>
+
+          <ConnectionLines
+            enabledDevices={enabledDevices}
+            scaledWidth={scaledDimensions.width}
+            scaledHeight={scaledDimensions.height}
+            offsetX={scaledDimensions.offsetX}
+          />
+
+          <BatteryComponent
+            scaledX={batteryInfo.scaledX}
+            scaledY={batteryInfo.scaledY}
+            scaledWidth={batteryInfo.scaledWidth}
+            scaledHeight={batteryInfo.scaledHeight}
+            label={batteryInfo.label!}
+            fontScaleFactor={scaledDimensions.fontScaleFactor}
+            chargeState={chargeState}
+            chargeAmount={batteryCharge}
+          />
+
+          {images.map((img, index) => (
+            <Fragment key={img.src}>
+              <ButtonBase
+                onClick={() =>
+                  toggleDevice(img.src.split('/').pop()?.split('.')[0] || '')
+                }
+                sx={{
+                  position: 'absolute',
+                  left: img.scaledX,
+                  top: img.scaledY,
+                  width: img.scaledWidth,
+                  height: img.scaledHeight,
+                  padding: 0,
+                  '&:hover': {
+                    opacity: 0.8,
+                  },
+                }}
+              >
+                <img
+                  src={process.env.PUBLIC_URL + img.src}
+                  alt={img.label}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    opacity: enabledDevices.includes(
+                      img.src.split('/').pop()?.split('.')[0] || ''
+                    )
+                      ? 1
+                      : 0.5,
+                  }}
+                />
+              </ButtonBase>
+
+              {img.scaledWidth &&
+                img.scaledHeight &&
+                img.scaledX &&
+                img.scaledY && (
+                  <Typography
+                    variant="body1"
+                    color="white"
+                    sx={{
+                      position: 'absolute',
+                      left: `${img.scaledX + img.scaledWidth * 0.5 - 150}px`,
+                      width: '300px',
+                      textAlign: 'center',
+                      fontSize: `${scaledDimensions.fontScaleFactor}rem`,
+                      top: `${
+                        img.scaledY +
+                        img.scaledHeight +
+                        10 * scaledDimensions.fontScaleFactor
+                      }px`,
+                      fontFamily: '"Kode Mono", monospace',
+                      textShadow:
+                        '-2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000',
+                    }}
+                  >
+                    {img.label}
+                  </Typography>
+                )}
+            </Fragment>
+          ))}
+
+          {debug && (
+            <Box
+              sx={{
+                width: `${scaledDimensions.width}px`,
+                height: `${scaledDimensions.height}px`,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                position: 'relative',
+              }}
             >
-              Battery Demo Feature {Math.floor(scaledDimensions.width)}x
-              {Math.floor(scaledDimensions.height)}
-            </Typography>
-          </Box>
-        )}
-        <ScrollArrow
-          onClick={handleScrollDown}
-          scaleFactor={scaledDimensions.fontScaleFactor}
+              <Typography
+                variant="h4"
+                sx={{color: 'white', textShadow: '2px 2px 4px rgba(0,0,0,0.5)'}}
+              >
+                Battery Demo Feature {Math.floor(scaledDimensions.width)}x
+                {Math.floor(scaledDimensions.height)}
+              </Typography>
+            </Box>
+          )}
+          <ScrollArrow
+            onClick={handleScrollDown}
+            scaleFactor={scaledDimensions.fontScaleFactor}
+          />
+        </Box>
+      ) : (
+        <MobileBatteryDemo
+          batteryCharge={batteryCharge}
+          chargeState={chargeState}
+          enabledDevices={enabledDevices}
+          toggleDevice={toggleDevice}
+          images={images}
+          batteryInfo={batteryInfo}
         />
-      </Box>
+      )}
     </Box>
   );
 };

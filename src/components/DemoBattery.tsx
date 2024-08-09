@@ -51,7 +51,7 @@ const BatteryComponent: React.FC<BatteryComponentProps> = ({
   ) {
     chargeStateLabelColor = 'rgb(252,177,229)';
   } else if (chargeState === ChargeState.CHARGING) {
-    chargeStateLabelColor = 'rgb(102,255,251)';
+    chargeStateLabelColor = 'rgb(252,177,229)';
   }
 
   let chargeStateLabel = '(small Wh battery for demo)';
