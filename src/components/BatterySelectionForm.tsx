@@ -21,6 +21,7 @@ const batteryTypes = [
   'Car Battery',
   'E-Bike Battery Pack',
   '10000 mAh Cell Phone Charger',
+  '18650 Li Ion Battery',
   'Custom',
 ];
 
@@ -42,8 +43,15 @@ const presetBatteryData: {[key: string]: BatteryData} = {
   '10000 mAh Cell Phone Charger': {
     batteryType: '10000 mAh Cell Phone Charger',
     volts: 5,
-    ampHours: 20,
-    wattHours: 100,
+    ampHours: 10,
+    wattHours: 50,
+    chemistry: 0.8,
+  },
+  '18650 Li Ion Battery': {
+    batteryType: '10000 mAh Cell Phone Charger',
+    volts: 3.6,
+    ampHours: 3.2,
+    wattHours: 11,
     chemistry: 0.8,
   },
   Custom: {
