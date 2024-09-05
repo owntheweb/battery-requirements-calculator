@@ -337,12 +337,21 @@ const BatteryDemoFeature: React.FC = () => {
           setChargeState(ChargeState.EMPTY);
         }
 
+        // Toggle off draining devices when battery is depleted
+        if (clampedCharge === 0) {
+          setEnabledDevices((prevEnabledDevices) =>
+            prevEnabledDevices.filter((device) =>
+              ['solarPanel', 'alternator'].includes(device)
+            )
+          );
+        }
+
         return clampedCharge;
       });
     }, updateInterval);
 
     return () => clearInterval(interval);
-  }, [calculateDcToAcPower, enabledDevices]);
+  }, [calculateDcToAcPower, enabledDevices, batteryCapacity, updateInterval]);
 
   return (
     <Box
