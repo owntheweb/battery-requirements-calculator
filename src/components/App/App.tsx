@@ -5,6 +5,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import {Warning as WarningIcon} from '@mui/icons-material';
 import {saveAs} from 'file-saver';
 import Papa from 'papaparse';
+import {v4 as uuidv4} from 'uuid';
 
 import BatteryDemoFeature from '../BatteryDemoFeature';
 import theme from '../../theme';
@@ -43,9 +44,10 @@ const App: React.FC = () => {
 
   // Export data as JSON
   const exportData = () => {
+    const devicesWithoutId = devices.map(({id, ...rest}) => rest);
     const data = {
       version: '1.0',
-      devices,
+      devices: devicesWithoutId,
       batteryData,
       batteryConfigurationData,
       batteryMathData: {
@@ -115,14 +117,22 @@ const App: React.FC = () => {
           try {
             const importedData = JSON.parse(e.target?.result as string);
             if (importedData.version === '1.0') {
+              // Generate new IDs for imported devices
+              const devicesWithNewIds = importedData.devices.map(
+                (device: Omit<Device, 'id'>) => ({
+                  ...device,
+                  id: uuidv4(),
+                })
+              );
+
               importedDataRef.current = {
-                devices: importedData.devices,
+                devices: devicesWithNewIds,
                 batteryData: importedData.batteryData,
                 batteryConfigurationData: importedData.batteryConfigurationData,
               };
 
               // Update the main state
-              updateDevices(importedData.devices, {
+              updateDevices(devicesWithNewIds, {
                 totalMaxWatts: importedData.batteryMathData.totalMaxWatts,
                 totalEstimatedWatts:
                   importedData.batteryMathData.totalEstimatedWatts,
