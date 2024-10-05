@@ -3,6 +3,7 @@ import {Typography, Box, Button, Collapse, Grid} from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import {BatteryMathData} from '../hooks/useBatteryCalculator';
+import DashedBorderBox from './DashedBorderBox';
 
 interface BatteryMathProps {
   batteryMathData: BatteryMathData;
@@ -138,33 +139,32 @@ const BatteryMath: React.FC<BatteryMathProps> = ({batteryMathData}) => {
         </Grid>
 
         <Grid item xs={12} lg={4}>
-          <Typography variant="h6" sx={{color: '#FCB1E5', mb: 2}}>
-            Estimated Battery Run Times
-          </Typography>
-          {renderTimeSection(
-            'Based on Daily Usage (Estimated Watts):',
-            'Total Battery Watt Hours ÷ Daily Usage (Estimated Watts)',
-            (batteryMathData.totalBatteryWattHours /
-              batteryMathData.dailyUsageEstimated) *
-              batteryMathData.estimatedDailyRunTime
-          )}
-          {renderTimeSection(
-            'Based on Daily Usage (Max Watts):',
-            'Total Battery Watt Hours ÷ Daily Usage (Max Watts)',
-            (batteryMathData.totalBatteryWattHours /
-              batteryMathData.dailyUsageMax) *
-              batteryMathData.maxDailyRunTime
-          )}
-          {renderTimeSection(
-            'All Devices On (Estimated Watts):',
-            'Total Battery Watt Hours ÷ Total Estimated Watts',
-            batteryMathData.estimatedRunTime
-          )}
-          {renderTimeSection(
-            'All Devices On (Max Watts):',
-            'Total Battery Watt Hours ÷ Total Max Watts',
-            batteryMathData.worstCaseRunTime
-          )}
+          <DashedBorderBox title="Estimated Battery Run Times">
+            {renderTimeSection(
+              'Based on Daily Usage (Estimated Watts):',
+              'Total Battery Watt Hours ÷ Daily Usage (Estimated Watts)',
+              (batteryMathData.totalBatteryWattHours /
+                batteryMathData.dailyUsageEstimated) *
+                batteryMathData.estimatedDailyRunTime
+            )}
+            {renderTimeSection(
+              'Based on Daily Usage (Max Watts):',
+              'Total Battery Watt Hours ÷ Daily Usage (Max Watts)',
+              (batteryMathData.totalBatteryWattHours /
+                batteryMathData.dailyUsageMax) *
+                batteryMathData.maxDailyRunTime
+            )}
+            {renderTimeSection(
+              'All Devices On (Estimated Watts):',
+              'Total Battery Watt Hours ÷ Total Estimated Watts',
+              batteryMathData.estimatedRunTime
+            )}
+            {renderTimeSection(
+              'All Devices On (Max Watts):',
+              'Total Battery Watt Hours ÷ Total Max Watts',
+              batteryMathData.worstCaseRunTime
+            )}
+          </DashedBorderBox>
         </Grid>
       </Grid>
     </Box>

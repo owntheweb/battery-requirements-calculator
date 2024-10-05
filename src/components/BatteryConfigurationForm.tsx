@@ -1,10 +1,10 @@
-import React, {useState, useEffect, useCallback} from 'react';
-import {TextField, Grid, Box, useTheme, Typography} from '@mui/material';
+import React, { useState, useEffect, useCallback } from 'react';
+import { TextField, Grid, Box, useTheme, Typography, Tooltip } from '@mui/material';
 import BatteryFullIcon from '@mui/icons-material/BatteryFull';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
-import {BatteryData} from '../model/BatteryData';
-import {BatteryConfigurationData} from '../model/BatteryConfigurationData';
+import { BatteryData } from '../model/BatteryData';
+import { BatteryConfigurationData } from '../model/BatteryConfigurationData';
 
 interface BatteryConfigurationFormProps {
   batteryData: BatteryData;
@@ -44,7 +44,6 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
     [batteryData]
   );
 
-  // Effect to handle imported data
   useEffect(() => {
     if (importTrigger && importedConfigData) {
       console.log('Importing config data:', importedConfigData);
@@ -61,12 +60,12 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
   }, [importTrigger, importedConfigData, calculateTotals, onConfigChange]);
 
   const handleChange = useCallback(
-    (field: 'seriesCount' | 'parallelCount', value: number) => {
-      const newValue = Math.max(1, value);
+    (field: 'seriesCount' | 'parallelCount', value: string) => {
+      const numValue = Math.max(1, parseInt(value) || 1);
       setConfig((prevConfig) => {
         const updatedConfig = {
           ...prevConfig,
-          [field]: newValue,
+          [field]: numValue,
         };
         const newConfig = calculateTotals(updatedConfig);
         onConfigChange(newConfig);
@@ -74,6 +73,29 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
       });
     },
     [calculateTotals, onConfigChange]
+  );
+
+  const renderTextField = useCallback(
+    (field: 'seriesCount' | 'parallelCount', label: string, tooltip: string) => {
+      return (
+        <Tooltip title={tooltip} placement="top-start">
+          <TextField
+            label={label}
+            type="number"
+            value={config[field] || ''}
+            onChange={(e) => handleChange(field, e.target.value)}
+            onFocus={(e) => e.target.select()}
+            fullWidth
+            margin="normal"
+            InputLabelProps={{ shrink: true }}
+            InputProps={{
+              inputProps: { min: 1 },
+            }}
+          />
+        </Tooltip>
+      );
+    },
+    [config, handleChange]
   );
 
   const renderBatteryGrid = () => {
@@ -108,9 +130,9 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
 
         {/* Battery grid */}
         <g transform={`translate(${iconSize}, 0)`}>
-          {Array.from({length: config.parallelCount}).map((_, rowIndex) => (
+          {Array.from({ length: config.parallelCount }).map((_, rowIndex) => (
             <g key={`row-${rowIndex}`}>
-              {Array.from({length: config.seriesCount}).map((_, colIndex) => (
+              {Array.from({ length: config.seriesCount }).map((_, colIndex) => (
                 <g
                   key={`battery-${rowIndex}-${colIndex}`}
                   transform={`translate(${colIndex * cellWidth}, ${
@@ -205,34 +227,18 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
     <Box>
       <Grid container spacing={2}>
         <Grid item xs={6}>
-          <TextField
-            label="Batteries In Series"
-            type="number"
-            value={config.seriesCount}
-            onChange={(e) =>
-              handleChange('seriesCount', parseInt(e.target.value) || 1)
-            }
-            fullWidth
-            margin="normal"
-            InputProps={{
-              inputProps: {min: 1},
-            }}
-          />
+          {renderTextField(
+            'seriesCount',
+            'Batteries In Series',
+            'Number of batteries connected in series. This increases the total voltage.'
+          )}
         </Grid>
         <Grid item xs={6}>
-          <TextField
-            label="Parallel Battery Strings"
-            type="number"
-            value={config.parallelCount}
-            onChange={(e) =>
-              handleChange('parallelCount', parseInt(e.target.value) || 1)
-            }
-            fullWidth
-            margin="normal"
-            InputProps={{
-              inputProps: {min: 1},
-            }}
-          />
+          {renderTextField(
+            'parallelCount',
+            'Parallel Battery Strings',
+            'Number of parallel battery strings. This increases the total amp-hours.'
+          )}
         </Grid>
       </Grid>
 
@@ -259,7 +265,7 @@ const BatteryConfigurationForm: React.FC<BatteryConfigurationFormProps> = ({
         >
           {renderBatteryGrid()}
         </Box>
-        <Grid container spacing={2} sx={{mt: 1}}>
+        <Grid container spacing={2} sx={{ mt: 1 }}>
           <Grid item xs={4}>
             <Typography variant="h6" align="center" color="#FCB1E5">
               Volts:

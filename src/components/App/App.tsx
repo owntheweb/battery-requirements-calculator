@@ -1,5 +1,5 @@
 import React, {useState, useCallback, useRef} from 'react';
-import {Box, Container, Typography, Divider, Button} from '@mui/material';
+import {Box, Container, Typography, Divider, Button, Link} from '@mui/material';
 import {ThemeProvider} from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import {Warning as WarningIcon} from '@mui/icons-material';
@@ -18,13 +18,13 @@ import {useBatteryCalculator} from '../../hooks/useBatteryCalculator';
 import {Device} from '../../model/Device';
 import {BatteryData} from '../../model/BatteryData';
 import {BatteryConfigurationData} from '../../model/BatteryConfigurationData';
+import Footer from '../Footer';
 
 const App: React.FC = () => {
   const {
     batteryData,
     batteryConfigurationData,
     devices,
-    deviceTotals,
     batteryMathData,
     updateBatteryData,
     updateBatteryConfig,
@@ -266,6 +266,20 @@ const App: React.FC = () => {
           </Box>
 
           <Box sx={{p: 3}}>
+            <Typography variant="h2" gutterBottom color="primary">
+              Now What?
+            </Typography>
+            <Typography variant="body1">
+              Use and recharge batteries safely with a <Link href="https://en.wikipedia.org/wiki/Battery_management_system">Battery Management System (BMS)</Link>. When using batteries to power sensitive
+              electronics, consider adding a <Link href="https://en.wikipedia.org/wiki/Power_management_system">Power Management System (PMS)</Link>. Checkout books such as DIY Lithium Batteries - 
+              How To Build Your Own Battery Packs by Micah Toll. You have the power.
+            </Typography>
+            <Typography variant="body1">
+              Charge forth.
+            </Typography>
+          </Box>
+
+          <Box sx={{p: 3}}>
             <Typography variant="h2" gutterBottom color="error">
               <WarningIcon /> Disclaimer
             </Typography>
@@ -285,6 +299,7 @@ const App: React.FC = () => {
               injury or death.
             </Typography>
           </Box>
+          <Footer />
         </Container>
       </Box>
     </ThemeProvider>

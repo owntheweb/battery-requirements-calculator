@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   TextField,
   Select,
@@ -9,7 +9,7 @@ import {
   Box,
   Tooltip,
 } from '@mui/material';
-import {BatteryData} from '../model/BatteryData';
+import { BatteryData } from '../model/BatteryData';
 
 interface BatterySelectionFormProps {
   onDataChange: (data: BatteryData) => void;
@@ -25,7 +25,7 @@ const batteryTypes = [
   'Custom',
 ];
 
-const presetBatteryData: {[key: string]: BatteryData} = {
+const presetBatteryData: { [key: string]: BatteryData } = {
   'Car Battery': {
     batteryType: 'Car Battery',
     volts: 13.5,
@@ -48,7 +48,7 @@ const presetBatteryData: {[key: string]: BatteryData} = {
     chemistry: 0.8,
   },
   '18650 Li Ion Battery': {
-    batteryType: '10000 mAh Cell Phone Charger',
+    batteryType: '18650 Li Ion Battery',
     volts: 3.6,
     ampHours: 3.2,
     wattHours: 11,
@@ -111,8 +111,28 @@ const BatterySelectionForm: React.FC<BatterySelectionFormProps> = ({
     }
   }, [batteryData, onDataChange]);
 
+  const renderTextField = useCallback(
+    (field: keyof BatteryData, label: string, tooltip: string) => {
+      return (
+        <Tooltip title={tooltip} placement="top-start">
+          <TextField
+            label={label}
+            type="number"
+            value={batteryData[field] || ''}
+            onChange={(e) => handleChange(field, e.target.value)}
+            onFocus={(e) => e.target.select()}
+            fullWidth
+            margin="normal"
+            InputLabelProps={{ shrink: true }}
+          />
+        </Tooltip>
+      );
+    },
+    [batteryData, handleChange]
+  );
+
   return (
-    <Box sx={{mt: 4}}>
+    <Box sx={{ mt: 4 }}>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
           <Tooltip
@@ -136,68 +156,32 @@ const BatterySelectionForm: React.FC<BatterySelectionFormProps> = ({
           </Tooltip>
         </Grid>
         <Grid item xs={12} sm={6}>
-          <Tooltip
-            title="The voltage of the battery. For example, a typical car battery is 12V"
-            placement="top-start"
-          >
-            <TextField
-              label="Volts"
-              type="number"
-              value={batteryData.volts || ''}
-              onChange={(e) => handleChange('volts', e.target.value)}
-              fullWidth
-              margin="normal"
-              InputLabelProps={{shrink: true}}
-            />
-          </Tooltip>
+          {renderTextField(
+            'volts',
+            'Volts',
+            'The voltage of the battery. For example, a typical car battery is 12V'
+          )}
         </Grid>
         <Grid item xs={12} sm={6}>
-          <Tooltip
-            title="The capacity of the battery in Amp-hours. This indicates how many hours the battery can provide a certain amount of current"
-            placement="top-start"
-          >
-            <TextField
-              label="Amp Hours"
-              type="number"
-              value={batteryData.ampHours || ''}
-              onChange={(e) => handleChange('ampHours', e.target.value)}
-              fullWidth
-              margin="normal"
-              InputLabelProps={{shrink: true}}
-            />
-          </Tooltip>
+          {renderTextField(
+            'ampHours',
+            'Amp Hours',
+            'The capacity of the battery in Amp-hours. This indicates how many hours the battery can provide a certain amount of current'
+          )}
         </Grid>
         <Grid item xs={12} sm={6}>
-          <Tooltip
-            title="The energy capacity of the battery in Watt-hours. It's calculated by multiplying Volts and Amp-hours"
-            placement="top-start"
-          >
-            <TextField
-              label="Watt Hours"
-              type="number"
-              value={batteryData.wattHours || ''}
-              onChange={(e) => handleChange('wattHours', e.target.value)}
-              fullWidth
-              margin="normal"
-              InputLabelProps={{shrink: true}}
-            />
-          </Tooltip>
+          {renderTextField(
+            'wattHours',
+            'Watt Hours',
+            "The energy capacity of the battery in Watt-hours. It's calculated by multiplying Volts and Amp-hours"
+          )}
         </Grid>
         <Grid item xs={12} sm={6}>
-          <Tooltip
-            title="A value representing the battery chemistry. Different chemistries have different characteristics and use cases"
-            placement="top-start"
-          >
-            <TextField
-              label="Chemistry"
-              type="number"
-              value={batteryData.chemistry || ''}
-              onChange={(e) => handleChange('chemistry', e.target.value)}
-              fullWidth
-              margin="normal"
-              InputLabelProps={{shrink: true}}
-            />
-          </Tooltip>
+          {renderTextField(
+            'chemistry',
+            'Chemistry',
+            'A value representing the battery chemistry. Different chemistries have different characteristics and use cases'
+          )}
         </Grid>
       </Grid>
     </Box>
